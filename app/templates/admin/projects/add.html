@@ -1,0 +1,213 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Создание проекта{% endblock %}
+
+{% block active_projects %}active{% endblock %}
+
+{% block breadcrumb %}
+<a href="/admin/">Главная</a> › <a href="/admin/projects">Проекты</a> › Создание
+{% endblock %}
+
+{% block extra_styles %}
+/* PROJECT ADD FORM CSS */
+.page-header{margin-bottom:25px}
+.page-title{font-size:28px;color:#333;font-weight:400}
+.form-container{background:#fff;border:1px solid #ddd;border-radius:4px;padding:30px;max-width:800px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:14px;font-weight:600;color:#333;margin-bottom:8px}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px;transition:border-color .2s ease;font-family:inherit}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:#417690}
+.form-textarea{min-height:120px;resize:vertical}
+.form-checkbox-wrapper{display:flex;align-items:center;gap:10px}
+.form-checkbox{width:18px;height:18px;cursor:pointer}
+.form-help{font-size:12px;color:#666;margin-top:6px}
+.form-actions{display:flex;gap:12px;margin-top:30px;padding-top:20px;border-top:1px solid #eee}
+.btn{padding:10px 20px;border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s ease;text-decoration:none;display:inline-block}
+.btn-primary{background:#417690;color:#fff}
+.btn-primary:hover{background:#2e5a6e}
+.btn-secondary{background:#6c757d;color:#fff}
+.btn-secondary:hover{background:#5a6268}
+.alert{padding:12px 16px;border-radius:4px;margin-bottom:20px;font-size:14px}
+.alert-error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+.form-section{margin-bottom:30px;padding-bottom:30px;border-bottom:1px solid #eee}
+.form-section:last-child{border-bottom:none}
+.section-title{font-size:18px;font-weight:600;color:#417690;margin-bottom:20px}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Создание проекта</h1>
+</div>
+
+<!-- Error messages -->
+{% if request.query_params.get('error') %}
+<div class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i> {{ request.query_params.get('error') }}
+</div>
+{% endif %}
+
+<div class="form-container">
+    <form method="post" action="/admin/projects/add" enctype="multipart/form-data">
+
+        <div class="form-section">
+            <div class="section-title">Основная информация</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="title" class="form-label">Название *</label>
+                    <input type="text" id="title" name="title" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="slug" class="form-label">Slug</label>
+                    <input type="text" id="slug" name="slug" class="form-input">
+                    <div class="form-help">Уникальный идентификатор для URL (если пусто, сгенерируется автоматически)</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="subtitle" class="form-label">Подзаголовок</label>
+                <input type="text" id="subtitle" name="subtitle" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">Описание</label>
+                <div id="editor-container" style="height: 300px;"></div>
+                <textarea id="description" name="description" style="display: none;"></textarea>
+                <div class="form-help">Используйте визуальный редактор для форматирования текста</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Локация</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city_id" class="form-label">Город *</label>
+                    <select id="city_id" name="city_id" class="form-select" required>
+                        <option value="">Выберите город</option>
+                        {% for city in cities %}
+                        <option value="{{ city.id }}">{{ city.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="address" class="form-label">Адрес *</label>
+                    <input type="text" id="address" name="address" class="form-input" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Характеристики</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="project_class" class="form-label">Класс проекта *</label>
+                    <select id="project_class" name="project_class" class="form-select" required>
+                        <option value="" disabled selected>Выберите класс</option>
+                        <option value="economy">Эконом</option>
+                        <option value="comfort">Комфорт</option>
+                        <option value="business">Бизнес</option>
+                        <option value="premium">Премиум</option>
+                        <option value="elite">Элитный</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="status" class="form-label">Статус *</label>
+                    <select id="status" name="status" class="form-select" required>
+                        <option value="current" selected>Текущий</option>
+                        <option value="completed">Завершен</option>
+                        <option value="planned">Планируемый</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="implementation_stage" class="form-label">Стадия реализации</label>
+                    <input type="text" id="implementation_stage" name="implementation_stage" class="form-input" placeholder="Например: Котлован">
+                </div>
+
+                <div class="form-group">
+                    <label for="completion_date" class="form-label">Дата завершения</label>
+                    <input type="text" id="completion_date" name="completion_date" class="form-input" placeholder="Например: 2 квартал 2025">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="sold_percent" class="form-label">Процент продаж</label>
+                <input type="number" id="sold_percent" name="sold_percent" class="form-input" min="0" max="100" value="0">
+                <div class="form-help">От 0 до 100</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Изображения</div>
+
+            <div class="form-group">
+                <label for="images" class="form-label">Загрузить изображения</label>
+                <input type="file" id="images" name="images" class="form-input" multiple accept="image/*">
+                <div class="form-help">Можно выбрать несколько изображений</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Публикация</div>
+
+            <div class="form-group">
+                <div class="form-checkbox-wrapper">
+                    <input type="checkbox" id="is_published" name="is_published" class="form-checkbox" value="true">
+                    <label for="is_published" class="form-label" style="margin-bottom:0">Опубликовать</label>
+                </div>
+                <div class="form-help">Опубликованные проекты отображаются на сайте</div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Создать
+            </button>
+            <a href="/admin/projects" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Quill Editor CSS & JS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    // Инициализация Quill редактора
+    var quill = new Quill('#editor-container', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'align': [] }],
+                ['link'],
+                ['clean']
+            ]
+        }
+    });
+
+    // Постоянная синхронизация при изменении контента
+    var descriptionTextarea = document.getElementById('description');
+    quill.on('text-change', function() {
+        descriptionTextarea.value = quill.root.innerHTML;
+    });
+
+    // Синхронизация при отправке формы
+    document.querySelector('form').addEventListener('submit', function() {
+        descriptionTextarea.value = quill.root.innerHTML;
+    });
+</script>
+{% endblock %}

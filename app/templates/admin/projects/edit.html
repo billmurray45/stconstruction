@@ -1,0 +1,259 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Редактирование проекта{% endblock %}
+
+{% block active_projects %}active{% endblock %}
+
+{% block breadcrumb %}
+<a href="/admin/">Главная</a> › <a href="/admin/projects">Проекты</a> › Редактирование
+{% endblock %}
+
+{% block extra_styles %}
+/* PROJECT EDIT FORM CSS */
+.page-header{margin-bottom:25px}
+.page-title{font-size:28px;color:#333;font-weight:400}
+.form-container{background:#fff;border:1px solid #ddd;border-radius:4px;padding:30px;max-width:800px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:14px;font-weight:600;color:#333;margin-bottom:8px}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px;transition:border-color .2s ease;font-family:inherit}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:#417690}
+.form-textarea{min-height:120px;resize:vertical}
+.form-checkbox-wrapper{display:flex;align-items:center;gap:10px}
+.form-checkbox{width:18px;height:18px;cursor:pointer}
+.form-help{font-size:12px;color:#666;margin-top:6px}
+.form-actions{display:flex;gap:12px;margin-top:30px;padding-top:20px;border-top:1px solid #eee}
+.btn{padding:10px 20px;border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s ease;text-decoration:none;display:inline-block}
+.btn-primary{background:#417690;color:#fff}
+.btn-primary:hover{background:#2e5a6e}
+.btn-secondary{background:#6c757d;color:#fff}
+.btn-secondary:hover{background:#5a6268}
+.alert{padding:12px 16px;border-radius:4px;margin-bottom:20px;font-size:14px}
+.alert-error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+.form-section{margin-bottom:30px;padding-bottom:30px;border-bottom:1px solid #eee}
+.form-section:last-child{border-bottom:none}
+.section-title{font-size:18px;font-weight:600;color:#417690;margin-bottom:20px}
+.current-images{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;margin-bottom:20px}
+.current-image{position:relative;border:1px solid #ddd;border-radius:4px;overflow:hidden;aspect-ratio:16/9}
+.current-image img{width:100%;height:100%;object-fit:cover}
+.current-image.marked-delete{opacity:.4;border-color:#dc3545}
+.current-image.marked-delete::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(220,53,69,.2);pointer-events:none}
+.image-delete-btn{position:absolute;top:8px;right:8px;background:#dc3545;color:#fff;border:none;border-radius:4px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s ease;z-index:10}
+.image-delete-btn:hover{background:#c82333;transform:scale(1.1)}
+.image-delete-btn i{pointer-events:none}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Редактирование: {{ project.title }}</h1>
+</div>
+
+<!-- Error messages -->
+{% if request.query_params.get('error') %}
+<div class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i> {{ request.query_params.get('error') }}
+</div>
+{% endif %}
+
+<div class="form-container">
+    <form method="post" action="/admin/projects/{{ project.id }}/edit" enctype="multipart/form-data">
+
+        <div class="form-section">
+            <div class="section-title">Основная информация</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="title" class="form-label">Название *</label>
+                    <input type="text" id="title" name="title" class="form-input" value="{{ project.title }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="slug" class="form-label">Slug</label>
+                    <input type="text" id="slug" name="slug" class="form-input" value="{{ project.slug }}">
+                    <div class="form-help">Уникальный идентификатор для URL (если пусто, сгенерируется автоматически)</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="subtitle" class="form-label">Подзаголовок</label>
+                <input type="text" id="subtitle" name="subtitle" class="form-input" value="{{ project.subtitle or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">Описание</label>
+                <div id="editor-container" style="height: 300px;"></div>
+                <textarea id="description" name="description" style="display: none;">{{ project.description or '' }}</textarea>
+                <div class="form-help">Используйте визуальный редактор для форматирования текста</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Локация</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city_id" class="form-label">Город *</label>
+                    <select id="city_id" name="city_id" class="form-select" required>
+                        {% for city in cities %}
+                        <option value="{{ city.id }}" {% if city.id == project.city_id %}selected{% endif %}>{{ city.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="address" class="form-label">Адрес *</label>
+                    <input type="text" id="address" name="address" class="form-input" value="{{ project.address }}" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Характеристики</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="project_class" class="form-label">Класс проекта *</label>
+                    <select id="project_class" name="project_class" class="form-select" required>
+                        <option value="economy" {% if project.project_class.value == 'economy' %}selected{% endif %}>Эконом</option>
+                        <option value="comfort" {% if project.project_class.value == 'comfort' %}selected{% endif %}>Комфорт</option>
+                        <option value="business" {% if project.project_class.value == 'business' %}selected{% endif %}>Бизнес</option>
+                        <option value="premium" {% if project.project_class.value == 'premium' %}selected{% endif %}>Премиум</option>
+                        <option value="elite" {% if project.project_class.value == 'elite' %}selected{% endif %}>Элитный</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="status" class="form-label">Статус *</label>
+                    <select id="status" name="status" class="form-select" required>
+                        <option value="current" {% if project.status.value == 'current' %}selected{% endif %}>Текущий</option>
+                        <option value="completed" {% if project.status.value == 'completed' %}selected{% endif %}>Завершен</option>
+                        <option value="planned" {% if project.status.value == 'planned' %}selected{% endif %}>Планируемый</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="implementation_stage" class="form-label">Стадия реализации</label>
+                    <input type="text" id="implementation_stage" name="implementation_stage" class="form-input" value="{{ project.implementation_stage or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="completion_date" class="form-label">Дата завершения</label>
+                    <input type="text" id="completion_date" name="completion_date" class="form-input" value="{{ project.completion_date or '' }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="sold_percent" class="form-label">Процент продаж</label>
+                <input type="number" id="sold_percent" name="sold_percent" class="form-input" min="0" max="100" value="{{ project.sold_percent }}">
+                <div class="form-help">От 0 до 100</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Изображения</div>
+
+            {% if project.images and project.images.urls %}
+            <div class="form-group">
+                <label class="form-label">Текущие изображения</label>
+                <div class="form-help" style="margin-bottom:12px">Нажмите на красную кнопку, чтобы удалить изображение</div>
+                <div class="current-images">
+                    {% for image_url in project.images.urls %}
+                    <div class="current-image" data-image-url="{{ image_url }}">
+                        <img src="{{ image_url }}" alt="Изображение проекта">
+                        <button type="button" class="image-delete-btn" onclick="toggleImageDelete(this)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <input type="hidden" name="keep_images" value="{{ image_url }}">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="new_images" class="form-label">Добавить новые изображения</label>
+                <input type="file" id="new_images" name="new_images" class="form-input" multiple accept="image/*">
+                <div class="form-help">Новые изображения будут добавлены к существующим</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Публикация</div>
+
+            <div class="form-group">
+                <div class="form-checkbox-wrapper">
+                    <input type="checkbox" id="is_published" name="is_published" class="form-checkbox" value="true" {% if project.is_published %}checked{% endif %}>
+                    <label for="is_published" class="form-label" style="margin-bottom:0">Опубликовать</label>
+                </div>
+                <div class="form-help">Опубликованные проекты отображаются на сайте</div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Сохранить
+            </button>
+            <a href="/admin/projects" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Quill Editor CSS & JS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    // Инициализация Quill редактора
+    var quill = new Quill('#editor-container', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'align': [] }],
+                ['link'],
+                ['clean']
+            ]
+        }
+    });
+
+    // Загрузка существующего контента
+    var descriptionTextarea = document.getElementById('description');
+    if (descriptionTextarea.value) {
+        quill.root.innerHTML = descriptionTextarea.value;
+    }
+
+    // Постоянная синхронизация при изменении контента
+    quill.on('text-change', function() {
+        descriptionTextarea.value = quill.root.innerHTML;
+    });
+
+    // Синхронизация при отправке формы
+    document.querySelector('form').addEventListener('submit', function() {
+        descriptionTextarea.value = quill.root.innerHTML;
+    });
+
+    function toggleImageDelete(button) {
+        const imageContainer = button.closest('.current-image');
+        const hiddenInput = imageContainer.querySelector('input[name="keep_images"]');
+
+        if (imageContainer.classList.contains('marked-delete')) {
+            // Восстановить изображение
+            imageContainer.classList.remove('marked-delete');
+            hiddenInput.disabled = false;
+            button.innerHTML = '<i class="fas fa-trash"></i>';
+        } else {
+            // Отметить для удаления
+            imageContainer.classList.add('marked-delete');
+            hiddenInput.disabled = true;
+            button.innerHTML = '<i class="fas fa-undo"></i>';
+        }
+    }
+</script>
+{% endblock %}

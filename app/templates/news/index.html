@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+<!-- SEO для страницы новостей -->
+{% block title %}Новости и события - Standart Construction{% endblock %}
+{% block meta_description %}Актуальные новости и события строительной компании Standart Construction. Следите за ходом строительства проектов, новыми объектами и специальными предложениями.{% endblock %}
+{% block meta_keywords %}новости, события, строительство, Standart Construction, новостройки, жилые комплексы{% endblock %}
+
+{% block content %}
+    <!-- News Header -->
+    <section class="news-header">
+        <div class="container">
+            <h1 class="page-title">Новости и события</h1>
+            <p class="page-subtitle">Будьте в курсе последних новостей и событий Standart Construction</p>
+        </div>
+    </section>
+
+    <!-- All News -->
+    <section class="news-page-section">
+        <div class="container">
+            {% if news_list %}
+                <div class="news-grid-full">
+                    {% for news in news_list %}
+                    <div class="news-card-full">
+                        <a href="/news/{{ news.slug }}" style="text-decoration: none; color: inherit;">
+                            <div class="news-card-image">
+                                {% if news.image_path %}
+                                    <img src="/static/{{ news.image_path }}" alt="{{ news.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <div class="news-placeholder-large">📰</div>
+                                {% endif %}
+                            </div>
+                            <div class="news-card-content">
+                                <div class="news-card-date">
+                                    {% if news.published_at %}
+                                        {{ news.published_at.strftime('%d.%m.%Y') }}
+                                    {% endif %}
+                                </div>
+                                <h3 class="news-card-title-full">{{ news.title }}</h3>
+                                {% if news.description %}
+                                    <p class="news-card-description">
+                                        {{ news.description[:200] }}{% if news.description|length > 200 %}...{% endif %}
+                                    </p>
+                                {% endif %}
+                                <span class="news-read-more">Читать далее →</span>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="news-empty">
+                    <div class="news-empty-icon">📰</div>
+                    <h3>Новостей пока нет</h3>
+                    <p>Скоро здесь появятся новости и события нашей компании</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

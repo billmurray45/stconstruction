@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site.meta_title if site and site.meta_title else 'Standart Construction - Строительная компания' }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ site.meta_description if site and site.meta_description else 'Строительство жилых комплексов комфорт, премиум и бизнес класса в Казахстане' }}{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}{{ site.meta_keywords if site and site.meta_keywords else 'строительство, жилой комплекс, квартиры, Казахстан' }}{% endblock %}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% block og_title %}{{ site.meta_title if site and site.meta_title else 'Standart Construction' }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ site.meta_description if site and site.meta_description else 'Строительство жилых комплексов' }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ site.logo_path if site and site.logo_path else '/static/images/logo.png' }}{% endblock %}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ site.meta_title if site and site.meta_title else 'Standart Construction' }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ site.meta_description if site and site.meta_description else 'Строительство жилых комплексов' }}{% endblock %}">
+
+    <link rel="preconnect" href="https://fonts.cdnfonts.com">
+    <link href="https://fonts.cdnfonts.com/css/gilroy-bold" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}?v=4" />
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+
+        <div class="container">
+            <nav class="nav-container">
+                <div class="logo">
+                    <img src="/static/images/logo.png" alt="Standart Construction" class="logo-image">
+                </div>
+
+                <ul class="nav-links">
+                    <li><a href="/">Главная</a></li>
+                    <li><a href="/#projects">Проекты</a></li>
+                    <li><a href="/#about">О компании</a></li>
+                    <li><a href="/#services">Услуги</a></li>
+                    <li><a href="/contacts">Контакты</a></li>
+                </ul>
+
+                <div class="auth-section">
+                    {% if current_user %}
+                        <button class="user-button" id="profileButton">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span>{{ current_user.username }}</span>
+                        </button>
+                    {% else %}
+                        <button class="auth-button" id="loginButton">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </button>
+                    {% endif %}
+                </div>
+
+                <div class="menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+{% block content %}
+{% endblock %}
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-header">
+                <div class="footer-logo">
+                    <img src="/static/images/logo.png" alt="Standart Construction">
+                </div>
+                <div class="footer-contact">
+                    <div class="footer-phone-number">{{ site.phone_primary if site and site.phone_primary else '+7 (777) 123-45-67' }}</div>
+                    <div class="footer-address">{{ site.addresses.text if site and site.addresses else 'РК, г. Шымкент, ул. Байтурсынова, 1' }}</div>
+                </div>
+            </div>
+
+            <nav class="footer-nav">
+                <a href="/#about">О компании</a>
+                <a href="/#projects">Проекты</a>
+                <a href="/contacts">Контакты</a>
+                <a href="/news">Новости</a>
+            </nav>
+
+            <div class="footer-social">
+                {% if site and site.social_instagram %}
+                <a href="{{ site.social_instagram }}" target="_blank" class="social-icon">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                {% endif %}
+                {% if site and site.social_facebook %}
+                <a href="{{ site.social_facebook }}" target="_blank" class="social-icon">
+                    <i class="fab fa-facebook"></i>
+                </a>
+                {% endif %}
+                {% if site and site.social_whatsapp %}
+                <a href="{{ site.social_whatsapp }}" target="_blank" class="social-icon">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                {% endif %}
+                {% if site and site.social_telegram %}
+                <a href="{{ site.social_telegram }}" target="_blank" class="social-icon">
+                    <i class="fab fa-telegram"></i>
+                </a>
+                {% endif %}
+                {% if site and site.social_youtube %}
+                <a href="{{ site.social_youtube }}" target="_blank" class="social-icon">
+                    <i class="fab fa-youtube"></i>
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="footer-bottom">
+                <p class="footer-copyright">© {% if site and site.company_name %}{{ site.company_name }}{% endif %}, 2025.</p>
+                <p class="footer-disclaimer">Архитектурные и визуальные решения носят условный характер и могут изменяться в процессе реализации проекта. Информация на сайте не является публичной офертой.</p>
+            </div>
+        </div>
+    </footer>
+
+    {% if not current_user %}
+    <!-- Auth Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeAuthModal">&times;</button>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Вход</button>
+                <button class="auth-tab" data-tab="register">Регистрация</button>
+            </div>
+
+            <!-- Вход -->
+            <div class="auth-form-container active" id="loginForm">
+                <h2>Вход в систему</h2>
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Пароль</label>
+                        <input type="password" id="loginPassword" name="password" required>
+                    </div>
+                    <div class="form-error" id="loginError"></div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Войти</button>
+                </form>
+            </div>
+
+            <!-- Регистрация -->
+            <div class="auth-form-container" id="registerForm">
+                <h2>Регистрация</h2>
+                <form id="registerFormElement">
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerUsername">Имя пользователя</label>
+                        <input type="text" id="registerUsername" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerFullName">Полное имя</label>
+                        <input type="text" id="registerFullName" name="full_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Пароль</label>
+                        <input type="password" id="registerPassword" name="password" required minlength="6">
+                    </div>
+                    <div class="form-error" id="registerError"></div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Зарегистрироваться</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if current_user %}
+    <!-- Профиль -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeProfileModal">&times;</button>
+
+            <h2 style="color: var(--primary-blue); margin-bottom: 30px;">Профиль пользователя</h2>
+
+            <div id="profileContent">
+                <div class="profile-loading">Загрузка...</div>
+            </div>
+
+            <div id="profileData" style="display: none;">
+                <div class="profile-info">
+                    <div class="profile-field">
+                        <label>Email:</label>
+                        <span id="profileEmail"></span>
+                    </div>
+                    <div class="profile-field">
+                        <label>Имя пользователя:</label>
+                        <span id="profileUsername"></span>
+                    </div>
+                    <div class="profile-field">
+                        <label>Полное имя:</label>
+                        <span id="profileFullName"></span>
+                    </div>
+                    <div class="profile-field">
+                        <label>Дата регистрации:</label>
+                        <span id="profileCreatedAt"></span>
+                    </div>
+                    <div class="profile-field">
+                        <label>Статус:</label>
+                        <span id="profileStatus"></span>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <a href="/admin" id="adminPanelButton" style="display: none;" class="btn btn-primary">
+                        Админ-панель
+                    </a>
+                    <button id="logoutButton" class="btn btn-secondary" style="background: #dc3545; border-color: #dc3545;">
+                        Выйти
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        // Mobile Menu Toggle
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Smooth Scrolling with offset for fixed header
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const headerHeight = document.querySelector('.header').offsetHeight;
+                    const targetPosition = target.offsetTop - headerHeight - 20;
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Header Background on Scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.backdropFilter = 'blur(10px)';
+            } else {
+                header.style.background = 'var(--white)';
+                header.style.backdropFilter = 'none';
+            }
+        });
+
+        // Form Submission
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                // Get form data
+                const formData = new FormData(contactForm);
+                const data = Object.fromEntries(formData);
+
+                // Show success message
+                alert('Спасибо за ваше сообщение! Мы свяжемся с вами в ближайшее время.');
+
+                // Reset form
+                contactForm.reset();
+
+                // Here you would typically send data to server
+                console.log('Form submitted:', data);
+            });
+        }
+
+        // Animation on Scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'slideInUp 0.6s ease-out';
+                    entry.target.style.opacity = '1';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all project cards and service cards
+        document.querySelectorAll('.project-card, .service-card').forEach(card => {
+            card.style.opacity = '0';
+            observer.observe(card);
+        });
+
+        // Modern Project Tabs Switcher
+        const projectTabs = document.querySelectorAll('.tab-btn');
+        projectTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const selectedCity = e.target.dataset.city;
+
+                // Remove active class from all tabs
+                projectTabs.forEach(t => t.classList.remove('active'));
+
+                // Add active class to clicked tab
+                e.target.classList.add('active');
+
+                // Filter projects
+                const projects = document.querySelectorAll('.modern-project-card');
+                projects.forEach(project => {
+                    const projectCity = project.dataset.city;
+
+                    if (selectedCity === 'all' || projectCity === selectedCity) {
+                        project.style.display = 'grid';
+                        // Add fade-in animation
+                        project.style.animation = 'fadeIn 0.5s ease';
+                    } else {
+                        project.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Project Carousel
+        document.querySelectorAll('.nav-arrow').forEach(arrow => {
+            arrow.addEventListener('click', (e) => {
+                const carouselId = e.currentTarget.dataset.carousel;
+                const carousel = document.getElementById(carouselId);
+                if (!carousel) return;
+
+                const images = carousel.querySelectorAll('.carousel-image');
+                let currentIndex = Array.from(images).findIndex(img => img.classList.contains('active'));
+
+                // Remove active class from current image
+                images[currentIndex].classList.remove('active');
+
+                // Determine next index
+                if (e.currentTarget.classList.contains('nav-next')) {
+                    currentIndex = (currentIndex + 1) % images.length;
+                } else {
+                    currentIndex = (currentIndex - 1 + images.length) % images.length;
+                }
+
+                // Add active class to new image
+                images[currentIndex].classList.add('active');
+            });
+        });
+
+        // Quick callback forms
+        document.querySelectorAll('form').forEach(form => {
+            if (form.id !== 'contactForm' && form.id !== 'loginFormElement' && form.id !== 'registerFormElement') {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    alert('Спасибо! Мы перезвоним вам в ближайшее время.');
+                    form.reset();
+                });
+            }
+        });
+
+        // Add some interactive hover effects
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Add scroll offset for section targeting
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+            const headerHeight = document.querySelector('.header').offsetHeight;
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - headerHeight - 50;
+                const sectionHeight = section.offsetHeight;
+                if (window.pageYOffset >= sectionTop && window.pageYOffset < sectionTop + sectionHeight) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Loading animation
+        window.addEventListener('load', () => {
+            document.body.style.opacity = '1';
+        });
+
+        // Add loading state to body
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.5s ease-in-out';
+    </script>
+
+    <script src="{{ url_for('static', path='js/auth.js') }}"></script>
+</body>
+</html>

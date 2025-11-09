@@ -1,0 +1,82 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Редактирование города{% endblock %}
+
+{% block active_cities %}active{% endblock %}
+
+{% block breadcrumb %}
+<a href="/admin/">Главная</a> › <a href="/admin/cities">Города</a> › Редактирование
+{% endblock %}
+
+{% block extra_styles %}
+/* CITY EDIT FORM CSS */
+.page-header{margin-bottom:25px}
+.page-title{font-size:28px;color:#333;font-weight:400}
+.form-container{background:#fff;border:1px solid #ddd;border-radius:4px;padding:30px;max-width:600px}
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:14px;font-weight:600;color:#333;margin-bottom:8px}
+.form-input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px;transition:border-color .2s ease}
+.form-input:focus{outline:none;border-color:#417690}
+.form-checkbox-wrapper{display:flex;align-items:center;gap:10px}
+.form-checkbox{width:18px;height:18px;cursor:pointer}
+.form-help{font-size:12px;color:#666;margin-top:6px}
+.form-actions{display:flex;gap:12px;margin-top:30px}
+.btn{padding:10px 20px;border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s ease;text-decoration:none;display:inline-block}
+.btn-primary{background:#417690;color:#fff}
+.btn-primary:hover{background:#2e5a6e}
+.btn-secondary{background:#6c757d;color:#fff}
+.btn-secondary:hover{background:#5a6268}
+.alert{padding:12px 16px;border-radius:4px;margin-bottom:20px;font-size:14px}
+.alert-error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Редактирование города: {{ city.name }}</h1>
+</div>
+
+<!-- Error messages -->
+{% if request.query_params.get('error') %}
+<div class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i> {{ request.query_params.get('error') }}
+</div>
+{% endif %}
+
+<div class="form-container">
+    <form method="post" action="/admin/cities/{{ city.id }}/edit">
+        <div class="form-group">
+            <label for="name" class="form-label">Название *</label>
+            <input type="text" id="name" name="name" class="form-input" value="{{ city.name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="slug" class="form-label">Slug</label>
+            <input type="text" id="slug" name="slug" class="form-input" value="{{ city.slug }}">
+            <div class="form-help">Уникальный идентификатор для URL (если пусто, сгенерируется автоматически)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="sort_order" class="form-label">Порядок сортировки</label>
+            <input type="number" id="sort_order" name="sort_order" class="form-input" value="{{ city.sort_order }}">
+            <div class="form-help">Чем меньше число, тем выше город в списке</div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-checkbox-wrapper">
+                <input type="checkbox" id="is_active" name="is_active" class="form-checkbox" value="true" {% if city.is_active %}checked{% endif %}>
+                <label for="is_active" class="form-label" style="margin-bottom:0">Активен</label>
+            </div>
+            <div class="form-help">Активные города отображаются на сайте</div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Сохранить
+            </button>
+            <a href="/admin/cities" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Админ-панель{% endblock %} - Standart Construction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+/* BASE ADMIN CSS */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Roboto','Lucida Grande','DejaVu Sans','Bitstream Vera Sans',Verdana,Arial,sans-serif;background:#f8f8f8;min-height:100vh;display:flex}
+.sidebar{width:260px;background:#417690;color:#fff;position:fixed;height:100vh;overflow-y:auto;box-shadow:2px 0 5px rgba(0,0,0,0.1)}
+.sidebar-header{background:#2e5a6e;padding:20px;border-bottom:1px solid rgba(255,255,255,0.1)}
+.sidebar-title{font-size:20px;font-weight:400;color:#f5dd5d;margin-bottom:8px}
+.sidebar-subtitle{font-size:12px;color:rgba(255,255,255,0.7)}
+.sidebar-menu{padding:20px 0}
+.menu-section-title{padding:10px 20px;font-size:11px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.5);letter-spacing:.5px}
+.menu-item{display:block;padding:12px 20px;color:#fff;text-decoration:none;transition:all .2s ease;border-left:3px solid transparent;font-size:14px}
+.menu-item:hover{background:rgba(255,255,255,0.1);border-left-color:#f5dd5d}
+.menu-item.active{background:rgba(255,255,255,0.15);border-left-color:#f5dd5d;font-weight:500}
+.menu-item-icon{display:inline-block;width:20px;margin-right:10px;text-align:center;font-size:14px}
+.main-content{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.admin-header{background:#417690;color:#fff;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,0.1)}
+.breadcrumb{font-size:14px;color:rgba(255,255,255,0.8)}
+.breadcrumb a{color:#fff;text-decoration:none}
+.breadcrumb a:hover{text-decoration:underline}
+.admin-user-section{display:flex;align-items:center;gap:15px}
+.admin-user-info{text-align:right}
+.admin-user-name{font-size:14px;font-weight:500}
+.admin-user-role{font-size:12px;color:rgba(255,255,255,0.7)}
+.btn-logout{padding:6px 16px;background:rgba(0,0,0,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:4px;font-size:13px;cursor:pointer;transition:all .2s ease}
+.btn-logout:hover{background:rgba(0,0,0,0.3);border-color:rgba(255,255,255,0.5)}
+.admin-content{padding:30px;flex:1}
+.logout-form{display:inline}
+@media (max-width: 768px) {
+.sidebar{width:200px}
+.main-content{margin-left:200px}
+}
+{% block extra_styles %}{% endblock %}
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">Администрирование</div>
+            <div class="sidebar-subtitle">Standart Construction</div>
+        </div>
+
+        <nav class="sidebar-menu">
+            <div class="menu-section-title">Главное</div>
+            <a href="/admin/" class="menu-item {% block active_dashboard %}{% endblock %}">
+                <i class="fas fa-home menu-item-icon"></i>
+                Главная
+            </a>
+            <a href="/" class="menu-item" target="_blank">
+                <i class="fas fa-globe menu-item-icon"></i>
+                Перейти на сайт
+            </a>
+
+            <div class="menu-section-title">Контент</div>
+            <a href="/admin/news" class="menu-item {% block active_news %}{% endblock %}">
+                <i class="fas fa-newspaper menu-item-icon"></i>
+                Новости
+            </a>
+            <a href="/admin/projects" class="menu-item {% block active_projects %}{% endblock %}">
+                <i class="fas fa-building menu-item-icon"></i>
+                Проекты
+            </a>
+            <a href="/admin/cities" class="menu-item {% block active_cities %}{% endblock %}">
+                <i class="fas fa-city menu-item-icon"></i>
+                Города
+            </a>
+
+            <div class="menu-section-title">Пользователи</div>
+            <a href="/admin/users" class="menu-item {% block active_users %}{% endblock %}">
+                <i class="fas fa-users menu-item-icon"></i>
+                Пользователи
+            </a>
+
+            <div class="menu-section-title">Настройки</div>
+            <a href="/admin/settings" class="menu-item {% block active_settings %}{% endblock %}">
+                <i class="fas fa-cog menu-item-icon"></i>
+                Настройки сайта
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="breadcrumb">
+                {% block breadcrumb %}
+                <a href="/admin/">Главная</a>
+                {% endblock %}
+            </div>
+            <div class="admin-user-section">
+                <div class="admin-user-info">
+                    <div class="admin-user-name">{{ current_user.username }}</div>
+                    <div class="admin-user-role">Администратор</div>
+                </div>
+                <form method="post" action="/admin/logout" class="logout-form">
+                    <button type="submit" class="btn-logout">Выход</button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="admin-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

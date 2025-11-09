@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }} - Standart Construction{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="{{ project.description or project.subtitle or project.title }}">
+<meta property="og:title" content="{{ project.title }}">
+<meta property="og:description" content="{{ project.description or project.subtitle or '' }}">
+{% if project.images and project.images.urls %}<meta property="og:image" content="{{ request.base_url }}{{ project.images.urls[0] }}">{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="project-hero" {% if project.images and project.images.urls %}style="background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ project.images.urls[0] }}') center/cover no-repeat;"{% endif %}>
+    <div class="container">
+        <div class="project-hero-content">
+            <div class="project-badge {% if project.project_class.value == 'comfort' %}comfort{% elif project.project_class.value == 'premium' %}premium{% elif project.project_class.value == 'business' %}business{% endif %}">
+                {% if project.project_class.value == 'comfort' %}Комфорт-класс
+                {% elif project.project_class.value == 'premium' %}Премиум-класс
+                {% elif project.project_class.value == 'business' %}Бизнес-класс
+                {% endif %}
+            </div>
+            <h1>{{ project.title }}</h1>
+            {% if project.subtitle %}
+            <p class="subtitle">{{ project.subtitle }}</p>
+            {% endif %}
+
+            <div class="project-meta-hero">
+                <div class="meta-hero-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>{{ project.city.name }}, {{ project.address }}</span>
+                </div>
+                {% if project.status %}
+                <div class="meta-hero-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span>Статус:
+                        {% if project.status.value == 'current' %}Текущий
+                        {% elif project.status.value == 'completed' %}Завершен
+                        {% elif project.status.value == 'planned' %}Планируемый
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if project.images and project.images.urls %}
+<section class="project-gallery">
+    <div class="container">
+        <h2 style="text-align:center;font-size:2rem;color:var(--primary-blue);margin-bottom:40px;font-weight:700">Галерея проекта</h2>
+        <div class="gallery-grid">
+            {% for image_url in project.images.urls %}
+            <div class="gallery-item" onclick="openLightbox({{ loop.index0 }})">
+                <img src="{{ image_url }}" alt="{{ project.title }} {{ loop.index }}">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <div class="lightbox-close" onclick="closeLightbox(event)">&times;</div>
+    {% if project.images.urls|length > 1 %}
+    <div class="lightbox-nav lightbox-prev" onclick="changeLightboxImage(-1)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+    </div>
+    <div class="lightbox-nav lightbox-next" onclick="changeLightboxImage(1)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+    </div>
+    {% endif %}
+    <div class="lightbox-content">
+        <img id="lightbox-img" src="" alt="{{ project.title }}">
+    </div>
+</div>
+{% endif %}
+
+<!-- Info Section -->
+<section class="project-info-section">
+    <div class="container">
+        <div class="info-grid">
+            <div class="info-content">
+                <h2>О проекте</h2>
+                {% if project.description %}
+                <div class="project-description">
+                    {{ project.description | safe }}
+                </div>
+                {% else %}
+                <p>{{ project.title }} — современный жилой комплекс, который воплощает лучшие традиции строительства и инновационные технологии. Проект разработан с учетом всех потребностей современного жителя мегаполиса.</p>
+                {% endif %}
+            </div>
+
+            <div class="info-sidebar">
+                <h3>Детали проекта</h3>
+
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Город</div>
+                    <div class="sidebar-value">{{ project.city.name }}</div>
+                </div>
+
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Адрес</div>
+                    <div class="sidebar-value">{{ project.address }}</div>
+                </div>
+
+                {% if project.implementation_stage %}
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Этап реализации</div>
+                    <div class="sidebar-value">{{ project.implementation_stage }}</div>
+                </div>
+                {% endif %}
+
+                {% if project.completion_date %}
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Срок сдачи</div>
+                    <div class="sidebar-value">{{ project.completion_date }}</div>
+                </div>
+                {% endif %}
+
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Класс</div>
+                    <div class="sidebar-value">
+                        {% if project.project_class.value == 'comfort' %}Комфорт
+                        {% elif project.project_class.value == 'premium' %}Премиум
+                        {% elif project.project_class.value == 'business' %}Бизнес
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if project.sold_percent > 0 %}
+                <div class="sidebar-item">
+                    <div class="sidebar-label">Продано квартир</div>
+                    <div class="sidebar-value">{{ project.sold_percent }}%</div>
+                    <div class="sold-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ project.sold_percent }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Заинтересовались проектом?</h2>
+        <p>Свяжитесь с нами для получения подробной консультации</p>
+        <a href="/#contact" class="btn btn-primary">Связаться с нами</a>
+    </div>
+</section>
+
+<script>
+// Lightbox functionality
+let currentImageIndex = 0;
+const images = {{ project.images.urls|tojson if project.images and project.images.urls else '[]' }};
+
+function openLightbox(index) {
+    currentImageIndex = index;
+    document.getElementById('lightbox').classList.add('active');
+    document.getElementById('lightbox-img').src = images[currentImageIndex];
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(event) {
+    if (event.target.id === 'lightbox' || event.target.classList.contains('lightbox-close')) {
+        document.getElementById('lightbox').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function changeLightboxImage(direction) {
+    currentImageIndex += direction;
+    if (currentImageIndex < 0) currentImageIndex = images.length - 1;
+    if (currentImageIndex >= images.length) currentImageIndex = 0;
+    document.getElementById('lightbox-img').src = images[currentImageIndex];
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+    const lightbox = document.getElementById('lightbox');
+    if (lightbox.classList.contains('active')) {
+        if (e.key === 'Escape') {
+            closeLightbox({target: lightbox});
+        } else if (e.key === 'ArrowLeft') {
+            changeLightboxImage(-1);
+        } else if (e.key === 'ArrowRight') {
+            changeLightboxImage(1);
+        }
+    }
+});
+</script>
+{% endblock %}

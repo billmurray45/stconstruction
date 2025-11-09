@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+<!-- SEO для страницы контактов -->
+{% block title %}Контакты - Standart Construction{% endblock %}
+{% block meta_description %}Свяжитесь с нами: {{ site.phone_primary if site and site.phone_primary else '+7 (777) 123-45-67' }}, {{ site.email_general if site and site.email_general else 'info@standart-construction.kz' }}. Офисы в Шымкенте и Актау.{% endblock %}
+{% block meta_keywords %}контакты, телефон, адрес, Standart Construction, строительная компания Казахстан{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1 class="page-hero-title">Контакты</h1>
+        <p class="page-hero-subtitle">Свяжитесь с нами удобным для вас способом</p>
+    </div>
+</section>
+
+<section class="contacts-section">
+    <div class="container">
+        <div class="contacts-grid">
+
+            <div class="contacts-info">
+                <h2 class="section-title">Как с нами связаться</h2>
+
+                <div class="contact-block">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h3>Телефоны</h3>
+                        {% if site.phone_primary %}
+                        <a href="tel:{{ site.phone_primary }}" class="contact-link">{{ site.phone_primary }}</a>
+                        {% endif %}
+                        {% if site.phone_secondary %}
+                        <a href="tel:{{ site.phone_secondary }}" class="contact-link">{{ site.phone_secondary }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="contact-block">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h3>Email</h3>
+                        {% if site.email_general %}
+                        <a href="mailto:{{ site.email_general }}" class="contact-link">{{ site.email_general }}</a>
+                        {% endif %}
+                        {% if site.email_orders %}
+                        <a href="mailto:{{ site.email_orders }}" class="contact-link">{{ site.email_orders }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="contact-block">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h3>Адрес</h3>
+                        {% if site.addresses and site.addresses.text %}
+                        <p class="contact-text">{{ site.addresses.text }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if site.working_hours %}
+                <div class="contact-block">
+                    <div class="contact-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h3>Часы работы</h3>
+                        <p class="contact-text">{{ site.working_hours }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="contact-block">
+                    <div class="contact-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h3>Социальные сети</h3>
+                        <div class="contact-socials">
+                            {% if site.social_instagram %}
+                            <a href="{{ site.social_instagram }}" target="_blank" class="social-link instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            {% endif %}
+                            {% if site.social_facebook %}
+                            <a href="{{ site.social_facebook }}" target="_blank" class="social-link facebook">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                            {% endif %}
+                            {% if site.social_whatsapp %}
+                            <a href="{{ site.social_whatsapp }}" target="_blank" class="social-link whatsapp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            {% endif %}
+                            {% if site.social_telegram %}
+                            <a href="{{ site.social_telegram }}" target="_blank" class="social-link telegram">
+                                <i class="fab fa-telegram"></i>
+                            </a>
+                            {% endif %}
+                            {% if site.social_youtube %}
+                            <a href="{{ site.social_youtube }}" target="_blank" class="social-link youtube">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form-wrapper">
+                <h2 class="section-title">Напишите нам</h2>
+                <p class="form-description">Заполните форму и мы свяжемся с вами в ближайшее время</p>
+
+                <form class="contact-form" id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Ваше имя *</label>
+                        <input type="text" id="name" name="name" required class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Телефон *</label>
+                        <input type="tel" id="phone" name="phone" required class="form-control" placeholder="+7 (___) ___-__-__">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Тема обращения</label>
+                        <select id="subject" name="subject" class="form-control">
+                            <option value="general">Общий вопрос</option>
+                            <option value="project">Вопрос по проекту</option>
+                            <option value="purchase">Покупка квартиры</option>
+                            <option value="partnership">Сотрудничество</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Сообщение *</label>
+                        <textarea id="message" name="message" required class="form-control" rows="5"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-paper-plane"></i>
+                        Отправить сообщение
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="map-section">
+    <div class="container">
+        <h2 class="section-title">Мы на карте</h2>
+        <div class="map-container" style="position: relative; overflow: hidden; width: 100%; padding-top: 56.25%;">
+            <iframe 
+                style="position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%; border: none; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);"
+                src="https://widgets.2gis.com/widget?type=firmsonmap&options=%7B%22pos%22%3A%7B%22lat%22%3A43.676126%2C%22lon%22%3A51.148282%2C%22zoom%22%3A16%7D%2C%22opt%22%3A%7B%22city%22%3A%22aktau%22%7D%2C%22org%22%3A%2270000001104920939%22%7D"
+                frameborder="0"
+                allowfullscreen="true">
+            </iframe>
+        </div>
+    </div>
+</section>
+
+<script>
+// Простая валидация формы
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+
+    // TODO: Отправка на сервер
+    console.log('Form data:', data);
+
+    alert('Спасибо за ваше сообщение! Мы свяжемся с вами в ближайшее время.');
+    this.reset();
+});
+
+// Маска для телефона (простая)
+document.getElementById('phone').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 0) {
+        if (value[0] !== '7') value = '7' + value;
+        if (value.length > 11) value = value.slice(0, 11);
+
+        let formatted = '+7';
+        if (value.length > 1) formatted += ' (' + value.slice(1, 4);
+        if (value.length > 4) formatted += ') ' + value.slice(4, 7);
+        if (value.length > 7) formatted += '-' + value.slice(7, 9);
+        if (value.length > 9) formatted += '-' + value.slice(9, 11);
+
+        e.target.value = formatted;
+    }
+});
+</script>
+{% endblock %}

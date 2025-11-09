@@ -1,0 +1,323 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Настройки сайта{% endblock %}
+
+{% block active_settings %}active{% endblock %}
+
+{% block breadcrumb %}
+<a href="/admin/">Главная</a> › Настройки сайта
+{% endblock %}
+
+{% block extra_styles %}
+/* SETTINGS PAGE CSS */
+.page-header{margin-bottom:25px}
+.page-title{font-size:28px;color:#333;font-weight:400}
+.form-container{background:#fff;border:1px solid #ddd;border-radius:4px;overflow:hidden;max-width:1000px}
+
+/* Tabs Navigation */
+.tabs-nav{display:flex;background:#f8f9fa;border-bottom:2px solid #ddd;overflow-x:auto}
+.tab-button{flex:1;min-width:140px;padding:15px 20px;background:transparent;border:none;font-size:14px;font-weight:600;color:#666;cursor:pointer;transition:all .2s ease;border-bottom:3px solid transparent;white-space:nowrap}
+.tab-button:hover{background:#e9ecef;color:#417690}
+.tab-button.active{color:#417690;background:#fff;border-bottom-color:#417690}
+.tab-button i{margin-right:8px;font-size:16px}
+
+/* Tab Content */
+.tabs-content{padding:30px}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+.form-section{margin-bottom:30px;padding-bottom:30px;border-bottom:1px solid #eee}
+.form-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.section-title{font-size:18px;font-weight:600;color:#417690;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.section-title i{font-size:20px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:14px;font-weight:600;color:#333;margin-bottom:8px}
+.form-input,.form-textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px;transition:border-color .2s ease;font-family:inherit}
+.form-input:focus,.form-textarea:focus{outline:none;border-color:#417690}
+.form-textarea{min-height:100px;resize:vertical}
+.form-help{font-size:12px;color:#666;margin-top:6px}
+.form-actions{display:flex;gap:12px;margin-top:30px;padding-top:20px;border-top:1px solid #eee;position:sticky;bottom:0;background:#fff;z-index:10}
+.btn{padding:10px 20px;border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s ease;text-decoration:none;display:inline-block}
+.btn-primary{background:#417690;color:#fff}
+.btn-primary:hover{background:#2e5a6e}
+.alert{padding:12px 16px;border-radius:4px;margin-bottom:20px;font-size:14px}
+.alert-success{background:#d4edda;color:#155724;border:1px solid #c3e6cb}
+.alert-error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+.logo-preview{max-width:200px;margin-top:10px;border:1px solid #ddd;border-radius:4px;padding:10px}
+.logo-preview img{max-width:100%;height:auto}
+
+@media(max-width:768px){
+    .form-row{grid-template-columns:1fr}
+    .tabs-nav{flex-wrap:wrap}
+    .tab-button{flex:0 0 auto}
+}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Настройки сайта</h1>
+</div>
+
+<!-- Success/Error messages -->
+{% if request.query_params.get('success') == 'updated' %}
+<div class="alert alert-success">
+    <i class="fas fa-check-circle"></i> Настройки успешно обновлены!
+</div>
+{% elif request.query_params.get('error') %}
+<div class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i> {{ request.query_params.get('error') }}
+</div>
+{% endif %}
+
+<div class="form-container">
+    <!-- Tabs Navigation -->
+    <div class="tabs-nav">
+        <button type="button" class="tab-button active" data-tab="general">
+            <i class="fas fa-info-circle"></i> Основное
+        </button>
+        <button type="button" class="tab-button" data-tab="contacts">
+            <i class="fas fa-phone"></i> Контакты
+        </button>
+        <button type="button" class="tab-button" data-tab="social">
+            <i class="fas fa-share-alt"></i> Соцсети
+        </button>
+        <button type="button" class="tab-button" data-tab="legal">
+            <i class="fas fa-file-contract"></i> Юридическое
+        </button>
+        <button type="button" class="tab-button" data-tab="seo">
+            <i class="fas fa-search"></i> SEO
+        </button>
+        <button type="button" class="tab-button" data-tab="stats">
+            <i class="fas fa-chart-line"></i> Статистика
+        </button>
+    </div>
+
+    <form method="post" action="/admin/settings" enctype="multipart/form-data">
+        <div class="tabs-content">
+
+            <!-- Tab 1: Основная информация -->
+            <div class="tab-pane active" id="tab-general">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Основная информация
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company_name" class="form-label">Название компании *</label>
+                        <input type="text" id="company_name" name="company_name" class="form-input" value="{{ settings.company_name }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="logo" class="form-label">Логотип</label>
+                        {% if settings.logo_path %}
+                        <div class="logo-preview">
+                            <img src="{{ settings.logo_path }}" alt="Текущий логотип">
+                        </div>
+                        {% endif %}
+                        <input type="file" id="logo" name="logo" class="form-input" accept="image/*">
+                        <div class="form-help">Загрузите новый логотип (PNG, JPG, SVG)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Контактная информация -->
+            <div class="tab-pane" id="tab-contacts">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-phone"></i>
+                        Контактная информация
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone_primary" class="form-label">Основной телефон</label>
+                            <input type="text" id="phone_primary" name="phone_primary" class="form-input" value="{{ settings.phone_primary or '' }}" placeholder="+7 (777) 123-45-67">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone_secondary" class="form-label">Дополнительный телефон</label>
+                            <input type="text" id="phone_secondary" name="phone_secondary" class="form-input" value="{{ settings.phone_secondary or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email_general" class="form-label">Общий Email</label>
+                            <input type="email" id="email_general" name="email_general" class="form-input" value="{{ settings.email_general or '' }}" placeholder="info@company.kz">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email_orders" class="form-label">Email для заявок</label>
+                            <input type="email" id="email_orders" name="email_orders" class="form-input" value="{{ settings.email_orders or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="addresses_text" class="form-label">Адреса офисов</label>
+                        <textarea id="addresses_text" name="addresses_text" class="form-textarea">{{ settings.addresses.text if settings.addresses else '' }}</textarea>
+                        <div class="form-help">Укажите адреса офисов (каждый с новой строки)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="working_hours" class="form-label">Часы работы</label>
+                        <input type="text" id="working_hours" name="working_hours" class="form-input" value="{{ settings.working_hours or '' }}" placeholder="Пн-Пт: 9:00-18:00">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Социальные сети -->
+            <div class="tab-pane" id="tab-social">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-share-alt"></i>
+                        Социальные сети
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="social_instagram" class="form-label">Instagram</label>
+                            <input type="url" id="social_instagram" name="social_instagram" class="form-input" value="{{ settings.social_instagram or '' }}" placeholder="https://instagram.com/username">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="social_facebook" class="form-label">Facebook</label>
+                            <input type="url" id="social_facebook" name="social_facebook" class="form-input" value="{{ settings.social_facebook or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="social_whatsapp" class="form-label">WhatsApp</label>
+                            <input type="text" id="social_whatsapp" name="social_whatsapp" class="form-input" value="{{ settings.social_whatsapp or '' }}" placeholder="+77771234567">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="social_telegram" class="form-label">Telegram</label>
+                            <input type="url" id="social_telegram" name="social_telegram" class="form-input" value="{{ settings.social_telegram or '' }}" placeholder="https://t.me/username">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="social_youtube" class="form-label">YouTube</label>
+                        <input type="url" id="social_youtube" name="social_youtube" class="form-input" value="{{ settings.social_youtube or '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Юридическая информация -->
+            <div class="tab-pane" id="tab-legal">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-file-contract"></i>
+                        Юридическая информация
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="inn" class="form-label">ИНН</label>
+                            <input type="text" id="inn" name="inn" class="form-input" value="{{ settings.inn or '' }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bin" class="form-label">БИН</label>
+                            <input type="text" id="bin" name="bin" class="form-input" value="{{ settings.bin or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="legal_address" class="form-label">Юридический адрес</label>
+                        <textarea id="legal_address" name="legal_address" class="form-textarea">{{ settings.legal_address or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 5: SEO настройки -->
+            <div class="tab-pane" id="tab-seo">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-search"></i>
+                        SEO настройки
+                    </div>
+
+                    <div class="form-group">
+                        <label for="meta_title" class="form-label">Meta Title</label>
+                        <input type="text" id="meta_title" name="meta_title" class="form-input" value="{{ settings.meta_title or '' }}">
+                        <div class="form-help">Заголовок страницы для поисковых систем (55-60 символов)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="meta_description" class="form-label">Meta Description</label>
+                        <textarea id="meta_description" name="meta_description" class="form-textarea" rows="3">{{ settings.meta_description or '' }}</textarea>
+                        <div class="form-help">Описание страницы для поисковых систем (150-160 символов)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="meta_keywords" class="form-label">Meta Keywords</label>
+                        <input type="text" id="meta_keywords" name="meta_keywords" class="form-input" value="{{ settings.meta_keywords or '' }}">
+                        <div class="form-help">Ключевые слова через запятую</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 6: Статистика -->
+            <div class="tab-pane" id="tab-stats">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-chart-line"></i>
+                        Статистика для главной страницы
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="stats_projects_completed" class="form-label">Завершено проектов</label>
+                            <input type="number" id="stats_projects_completed" name="stats_projects_completed" class="form-input" value="{{ settings.stats_projects_completed or 0 }}" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="stats_clients" class="form-label">Количество клиентов</label>
+                            <input type="number" id="stats_clients" name="stats_clients" class="form-input" value="{{ settings.stats_clients or 0 }}" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stats_years_experience" class="form-label">Лет опыта</label>
+                        <input type="number" id="stats_years_experience" name="stats_years_experience" class="form-input" value="{{ settings.stats_years_experience or 0 }}" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions (sticky button) -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<script>
+// Tabs functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.dataset.tab;
+
+            // Remove active class from all buttons and panes
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabPanes.forEach(pane => pane.classList.remove('active'));
+
+            // Add active class to clicked button and corresponding pane
+            this.classList.add('active');
+            document.getElementById('tab-' + targetTab).classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %}

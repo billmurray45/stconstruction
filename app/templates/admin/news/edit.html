@@ -1,0 +1,215 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Редактировать новость{% endblock %}
+
+{% block active_news %}active{% endblock %}
+
+{% block breadcrumb %}
+<a href="/admin/">Главная</a> ›
+<a href="/admin/news">Новости</a> ›
+Редактировать
+{% endblock %}
+
+{% block extra_styles %}
+/* NEWS EDIT ADMIN CSS */
+.page-title{font-size:28px;color:#333;margin-bottom:25px;font-weight:400}
+.alert{padding:12px 16px;border-radius:4px;margin-bottom:20px;font-size:14px}
+.alert-error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+.form-wrapper{background:#fff;border:1px solid #ddd;border-radius:4px;padding:30px;max-width:900px}
+.form-group{margin-bottom:20px}
+.form-label{display:block;margin-bottom:8px;font-size:14px;font-weight:500;color:#333}
+.form-label.required::after{content:'*';color:#dc3545;margin-left:4px}
+.form-input,.form-textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px;font-family:inherit;transition:all .2s ease}
+.form-input:focus,.form-textarea:focus{outline:none;border-color:#417690;box-shadow:0 0 0 3px rgba(65,118,144,0.1)}
+.form-textarea{resize:vertical;min-height:100px}
+.form-textarea.content{min-height:300px;font-family:'Courier New',monospace}
+.form-help{font-size:12px;color:#666;margin-top:4px}
+.form-checkbox{display:flex;align-items:center;gap:8px}
+.form-checkbox input{width:18px;height:18px;cursor:pointer}
+.form-checkbox label{font-size:14px;color:#333;cursor:pointer}
+.file-input-wrapper{position:relative}
+.current-image{margin-bottom:15px;padding:15px;background:#f8f8f8;border:1px solid #ddd;border-radius:4px}
+.current-image-title{font-size:13px;color:#666;margin-bottom:10px;font-weight:500}
+.current-image img{max-width:300px;height:auto;border-radius:4px;border:1px solid #ddd}
+.file-input-label{display:inline-block;padding:10px 20px;background:#f8f8f8;border:1px solid #ddd;border-radius:4px;cursor:pointer;transition:all .2s ease;font-size:14px}
+.file-input-label:hover{background:#e8e8e8}
+.file-input-label i{margin-right:6px}
+input[type="file"]{display:none}
+.file-name{margin-top:8px;font-size:13px;color:#666}
+.form-actions{display:flex;gap:10px;margin-top:30px;padding-top:20px;border-top:1px solid #eee}
+.btn{padding:10px 24px;border:none;border-radius:4px;font-size:14px;cursor:pointer;transition:all .2s ease;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:#417690;color:#fff}
+.btn-primary:hover{background:#2e5a6e}
+.btn-secondary{background:#6c757d;color:#fff}
+.btn-secondary:hover{background:#5a6268}
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Редактировать новость #{{ news.id }}</h1>
+
+{% if error %}
+<div class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i> {{ error }}
+</div>
+{% endif %}
+
+<div class="form-wrapper">
+    <form method="post" action="/admin/news/{{ news.id }}/edit" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="title" class="form-label required">Заголовок</label>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                class="form-input"
+                required
+                value="{{ news.title }}"
+                placeholder="Введите заголовок новости"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="slug" class="form-label">Slug (URL)</label>
+            <input
+                type="text"
+                id="slug"
+                name="slug"
+                class="form-input"
+                value="{{ news.slug }}"
+                placeholder="Оставьте пустым для автогенерации"
+            >
+            <div class="form-help">Будет сгенерирован автоматически из заголовка, если оставить пустым</div>
+        </div>
+
+        <div class="form-group">
+            <label for="description" class="form-label required">Краткое описание</label>
+            <textarea
+                id="description"
+                name="description"
+                class="form-textarea"
+                required
+                placeholder="Краткое описание для превью"
+            >{{ news.description }}</textarea>
+            <div class="form-help">Отображается в списке новостей</div>
+        </div>
+
+        <div class="form-group">
+            <label for="content" class="form-label required">Полный текст</label>
+            <div id="editor-container" style="height: 400px;"></div>
+            <textarea
+                id="content"
+                name="content"
+                style="display: none;"
+            >{{ news.content }}</textarea>
+            <div class="form-help">Используйте визуальный редактор для форматирования текста</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Изображение</label>
+
+            <div class="current-image">
+                <div class="current-image-title">Текущее изображение:</div>
+                <img src="/static/{{ news.image_path }}" alt="{{ news.title }}">
+            </div>
+
+            <div class="file-input-wrapper">
+                <label for="image" class="file-input-label">
+                    <i class="fas fa-upload"></i>
+                    Загрузить новое изображение
+                </label>
+                <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/*"
+                    onchange="updateFileName(this)"
+                >
+                <div class="file-name" id="fileName">Оставить текущее изображение</div>
+            </div>
+            <div class="form-help">Рекомендуемый размер: 1200x630px. Оставьте пустым, чтобы сохранить текущее изображение.</div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-checkbox">
+                <input
+                    type="checkbox"
+                    id="is_published"
+                    name="is_published"
+                    value="true"
+                    {% if news.is_published %}checked{% endif %}
+                >
+                <label for="is_published">Опубликовано</label>
+            </div>
+            <div class="form-help">Снимите галочку, чтобы снять новость с публикации</div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Сохранить изменения
+            </button>
+            <a href="/admin/news" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Quill Editor CSS & JS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    // Инициализация Quill редактора
+    var quill = new Quill('#editor-container', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'align': [] }],
+                ['link', 'image'],
+                ['clean']
+            ]
+        }
+    });
+
+    // Загрузка существующего контента
+    var contentTextarea = document.getElementById('content');
+    if (contentTextarea.value) {
+        quill.root.innerHTML = contentTextarea.value;
+    }
+
+    // Постоянная синхронизация при изменении контента
+    quill.on('text-change', function() {
+        contentTextarea.value = quill.root.innerHTML;
+    });
+
+    // Синхронизация при отправке формы
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Еще раз синхронизируем перед отправкой
+        contentTextarea.value = quill.root.innerHTML;
+
+        // Проверка на пустоту
+        if (quill.getText().trim().length === 0) {
+            alert('Пожалуйста, заполните содержимое новости');
+            e.preventDefault();
+            return false;
+        }
+
+        console.log('Content to submit:', contentTextarea.value);
+    });
+
+    function updateFileName(input) {
+        const fileName = document.getElementById('fileName');
+        if (input.files && input.files[0]) {
+            fileName.textContent = 'Новое: ' + input.files[0].name;
+        } else {
+            fileName.textContent = 'Оставить текущее изображение';
+        }
+    }
+</script>
+{% endblock %}

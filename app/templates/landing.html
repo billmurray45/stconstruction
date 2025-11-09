@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section id="home" class="hero">
+	    <div class="hero-video-bg">
+        <iframe src="https://www.youtube.com/embed/4BzjUq921Y4?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playlist=4BzjUq921Y4"
+                frameborder="0"
+                allowfullscreen></iframe>
+		</div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Строительство <span class="highlight">будущего</span> начинается сегодня</h1>
+                    <p>Мы создаем современные жилые комплексы и коммерческие объекты с использованием передовых технологий и высочайших стандартов качества.</p>
+                    <div class="cta-buttons">
+                        <a href="#projects" class="btn btn-primary">Наши проекты</a>
+                        <a href="#contact" class="btn btn-secondary">Связаться с нами</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Текущие проекты -->
+    <section id="projects" class="projects" style="background: #f8f9fa;">
+        <div class="container">
+            <div class="section-header">
+                <h2>Текущие проекты</h2>
+            </div>
+
+            <div class="project-tabs">
+                <button class="tab-btn active" data-city="all">Все города</button>
+                {% for city in cities %}
+                <button class="tab-btn" data-city="{{ city.slug }}">{{ city.name }}</button>
+                {% endfor %}
+            </div>
+
+            <div class="projects-list">
+                {% for project in projects %}
+                <div class="modern-project-card" data-city="{{ project.city.slug if project.city else 'unknown' }}">
+                    <div class="project-left">
+                        <span class="project-class {% if project.project_class.value == 'comfort' %}comfort{% elif project.project_class.value == 'premium' %}premium{% elif project.project_class.value == 'business' %}business{% endif %}">
+                            {% if project.project_class.value == 'comfort' %}Комфорт-класс{% elif project.project_class.value == 'premium' %}Премиум-класс{% elif project.project_class.value == 'business' %}Бизнес-класс{% endif %}
+                        </span>
+                        <h3 class="project-title">{{ project.title }}</h3>
+                        {% if project.subtitle %}
+                        <p class="project-subtitle">{{ project.subtitle }}</p>
+                        {% endif %}
+
+                        <div class="project-meta">
+                            <div class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>{{ project.city.name if project.city else '' }}, {{ project.address }}</span>
+                            </div>
+                            {% if project.implementation_stage %}
+                            <div class="meta-item">
+                                <strong>Этап реализации:</strong>
+                                <span>{{ project.implementation_stage }}</span>
+                            </div>
+                            {% endif %}
+                            {% if project.completion_date %}
+                            <div class="meta-item">
+                                <strong>Срок сдачи:</strong>
+                                <span>{{ project.completion_date }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <a href="/projects/{{ project.slug }}" class="btn-details">Подробнее</a>
+                    </div>
+                    <div class="project-right">
+                        {% if project.sold_percent > 0 %}
+                        <div class="project-sold-badge">Продан<br>{{ project.sold_percent }}%</div>
+                        {% endif %}
+                        {% if project.images and project.images.urls and project.images.urls|length > 1 %}
+                        <div class="project-navigation">
+                            <button class="nav-arrow nav-prev" data-carousel="project-{{ project.id }}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <button class="nav-arrow nav-next" data-carousel="project-{{ project.id }}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                        {% endif %}
+                        <div class="project-carousel" id="project-{{ project.id }}">
+                            {% if project.images and project.images.urls %}
+                                {% for image_url in project.images.urls %}
+                                <img src="{{ image_url }}" alt="{{ project.title }} {{ loop.index }}" class="project-image-main carousel-image {% if loop.first %}active{% endif %}">
+                                {% endfor %}
+                            {% else %}
+                            <div style="width:100%;height:100%;background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);display:flex;align-items:center;justify-content:center;font-size:4rem;color:rgba(255,255,255,0.3)">🏢</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- О нас -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>О компании</h2>
+                    <p>Standart Construction — Казахстанская девелоперская компания из Актау, работающая на рынке жилья с 2010 года. Мы специализируемся на строительстве современных жилых проектов, где качество, сроки и клиентский сервис — приоритет.</p>
+                    <p>Сегодня мы развиваем строительство в Мангыстауской области и фокусируемся на комплексах комфорт и бизнес-класса. В работе применяем проверенные технологии и открыто показываем ход строительства — от еженедельных фотоотчётов до общения в соцсетях.</p>
+                    <a href="#contact" class="btn btn-primary">Обсудить проект</a>
+                </div>
+                <div class="about-right">
+                    <div class="about-image">
+                        <img src="/static/images/about.jpeg" alt="О компании">
+                    </div>
+                    <div class="about-stats">
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <div class="stat-number" data-target="{{ site.stats_projects_completed if site and site.stats_projects_completed else 50 }}">0</div>
+                                <div class="stat-label">Реализованных проектов</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <div class="stat-number" data-target="{{ site.stats_clients if site and site.stats_clients else 1000 }}">0</div>
+                                <div class="stat-label">Довольных клиентов</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <div class="stat-number" data-target="{{ site.stats_years_experience if site and site.stats_years_experience else 15 }}">0</div>
+                                <div class="stat-label">Лет опыта</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Услуги -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="services-content">
+                <div class="services-left">
+                    <h2>Наши услуги</h2>
+                    <p class="services-text">Standart Construction сочетает профессионализм, современные технологии и слаженную работу команды.</p>
+
+                    <p class="services-text">Мы уверены: надёжная команда и прозрачный подход — основа успешного строительства.</p>
+
+                    <p class="services-text">Мы реализуем проекты жилых комплексов, создавая комфортное и достойное жильё для семей. Наша цель — качество на каждом этапе: от проектирования и возведения до передачи ключей. Благодаря опыту и ответственному подходу, мы ценность для клиентов и уверенно строим будущее.</p>
+
+                    <div class="services-image">
+                        <img src="/static/images/services.jpeg">
+                    </div>
+                </div>
+
+                <div class="services-right">
+                    <div class="service-item">
+                        <div class="service-number">01</div>
+                        <div class="service-content">
+                            <h3>Девелопмент жилых комплексов</h3>
+                            <p>Мы создаем современные жилые проекты с продуманной архитектурой, удобными планировками и развитой инфраструктурой.</p>
+                        </div>
+                    </div>
+
+                    <div class="service-item">
+                        <div class="service-number">02</div>
+                        <div class="service-content">
+                            <h3>Продажа квартир в рассрочку</h3>
+                            <p>Предлагаем честные и прозрачные условия приобретения жилья в рассрочку без процентов и переплат.</p>
+                        </div>
+                    </div>
+
+                    <div class="service-item">
+                        <div class="service-number">03</div>
+                        <div class="service-content">
+                            <h3>Trade-in (обмен авто на первый взнос)</h3>
+                            <p>Удобная программа: используйте свой автомобиль как первый взнос за квартиру. Быстро, выгодно и безопасно.</p>
+                        </div>
+                    </div>
+
+                    <div class="service-item">
+                        <div class="service-number">04</div>
+                        <div class="service-content">
+                            <h3>Полное сопровождение клиента</h3>
+                            <p>Помогаем на каждом этапе: от выбора квартиры и оформления документов до получения ключей от вашего нового дома.</p>
+                        </div>
+                    </div>
+
+                    <div class="service-item">
+                        <div class="service-number">05</div>
+                        <div class="service-content">
+                            <h3>Сервис поддержки и обратной связи</h3>
+                            <p>Для нас важен каждый клиент — мы открыты к диалогу, консультируем и поддерживаем на всех этапах сотрудничества.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Additional Services -->
+    <section class="interesting">
+        <div class="container">
+            <div class="section-header">
+                <h2>Может быть интересно</h2>
+            </div>
+
+            <div class="interesting-grid">
+                <div class="interesting-card">
+                    <div class="interesting-image">
+                        <img src="https://roberthurstgroup.co.uk/wp-content/uploads/2025/09/Construction-Industry-Job-Search-Tips.jpg" alt="SDN Ресурсы">
+                    </div>
+                    <div class="interesting-content">
+                        <h3>Вакансии</h3>
+                        <p>Мы ценим профессионалов и талантливых специалистов. Присоединяйтесь к нашей команде и стройте будущее вместе с нами.</p>
+                    </div>
+                </div>
+
+                <div class="interesting-card">
+                    <div class="interesting-image">
+                        <img src="https://cdns.sipmm.edu.sg/publication/wp-content/uploads/2017/10/15184957/Five-Key-Criteria-for-Supplier-Evaluation-in-the-Construction-Sector-SIPMM.jpg" alt="Дизайн интерьеров">
+                    </div>
+                    <div class="interesting-content">
+                        <h3>Поставщикам</h3>
+                        <p>Открыты к сотрудничеству с подрядными организациями и надёжными поставщиками. Станьте частью наших проектов.</p>
+                    </div>
+                </div>
+
+                <div class="interesting-card">
+                    <div class="interesting-image">
+                        <img src="https://gauravdubey.in/wp-content/uploads/2024/03/Recent-Blog-Topics-and-Ideas-for-Construction-Company-1024x683.jpg" alt="SDN CRM">
+                    </div>
+                    <div class="interesting-content">
+                        <h3>Standart Blog</h3>
+                        <p>Читайте статьи о строительстве, тенденциях в архитектуре, дизайне и развитии городской среды.</p>
+                        <a href="#" class="interesting-link">Подробнее →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Контакты -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h2>Свяжитесь с нами</h2>
+                    <p>Готовы обсудить ваш проект? Наши специалисты всегда готовы предоставить профессиональную консультацию.</p>
+                    <div style="margin-top: 30px;">
+                        <a href="#" class="btn btn-secondary">Заказать звонок</a>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3 style="margin-bottom: 20px;">Быстрая связь</h3>
+                    <form>
+                        <div class="form-group">
+                            <label for="quick-name">Имя</label>
+                            <input type="text" id="quick-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="quick-phone">Телефон</label>
+                            <input type="tel" id="quick-phone" name="phone" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Перезвоните мне</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Новости -->
+    <section class="news-section">
+        <div class="container">
+            <h2 class="news-title">Новости</h2>
+
+            <div class="news-grid">
+                {% if latest_news %}
+                    {% for news in latest_news %}
+                    <div class="news-card">
+                        <a href="/news/{{ news.slug }}" style="text-decoration: none; color: inherit;">
+                            <div class="news-image">
+                                {% if news.image_path %}
+                                    <img src="/static/{{ news.image_path }}" alt="{{ news.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <div class="news-placeholder">📰</div>
+                                {% endif %}
+                            </div>
+                            <h3 class="news-card-title">{{ news.title }}</h3>
+                            {% if news.description %}
+                                <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 10px;">
+                                    {{ news.description[:100] }}{% if news.description|length > 100 %}...{% endif %}
+                                </p>
+                            {% endif %}
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="news-card">
+                        <div class="news-image">
+                            <div class="news-placeholder">📰</div>
+                        </div>
+                        <h3 class="news-card-title">Новостей пока нет</h3>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="news-load-more">
+                <a href="/news" class="btn-load-more">Все новости</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stats = document.querySelectorAll('.stat-number');
+        let animated = false;
+
+        const animateCounter = (element) => {
+            const target = parseInt(element.getAttribute('data-target'));
+            const duration = 2000; // 2 seconds
+            const increment = target / (duration / 16); // 60 FPS
+            let current = 0;
+
+            const updateCounter = () => {
+                current += increment;
+                if (current < target) {
+                    element.textContent = Math.floor(current);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    element.textContent = target;
+                }
+            };
+
+            updateCounter();
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !animated) {
+                    animated = true;
+                    stats.forEach(stat => animateCounter(stat));
+                    observer.disconnect();
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const aboutSection = document.querySelector('#about');
+        if (aboutSection) {
+            observer.observe(aboutSection);
+        }
+    });
+    </script>
+{% endblock %}

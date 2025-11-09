@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+<!-- SEO для конкретной новости -->
+{% block title %}{{ news.title }} - Новости Standart Construction{% endblock %}
+
+{% block meta_description %}{{ news.description[:160] if news.description else 'Читайте новость: ' + news.title }}{% endblock %}
+
+{% block meta_keywords %}{{ news.title }}, новости, Standart Construction, строительство{% endblock %}
+
+<!-- Open Graph для соцсетей -->
+{% block og_title %}{{ news.title }}{% endblock %}
+{% block og_description %}{{ news.description[:200] if news.description else news.title }}{% endblock %}
+{% block og_image %}{{ '/static/' + news.image_path if news.image_path else '/static/images/logo.png' }}{% endblock %}
+
+{% block content %}
+    <!-- News Article -->
+    <article class="news-article">
+        <div class="container">
+            <!-- Breadcrumbs -->
+            <nav class="breadcrumbs">
+                <a href="/">Главная</a>
+                <span>/</span>
+                <a href="/news">Новости</a>
+                <span>/</span>
+                <span>{{ news.title }}</span>
+            </nav>
+
+            <!-- Article Header -->
+            <header class="article-header">
+                <h1 class="article-title">{{ news.title }}</h1>
+
+                <div class="article-meta">
+                    <span class="article-date">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        {% if news.published_at %}
+                            {{ news.published_at.strftime('%d.%m.%Y') }}
+                        {% endif %}
+                    </span>
+                </div>
+
+                {% if news.description %}
+                    <p class="article-description">{{ news.description }}</p>
+                {% endif %}
+            </header>
+
+            <!-- Featured Image -->
+            {% if news.image_path %}
+            <div class="article-featured-image">
+                <img src="/static/{{ news.image_path }}" alt="{{ news.title }}">
+            </div>
+            {% endif %}
+
+            <!-- Article Content -->
+            <div class="article-content">
+                {{ news.content|safe }}
+            </div>
+
+            <!-- Back Button -->
+            <div class="article-footer">
+                <a href="/news" class="btn-back">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Вернуться к новостям
+                </a>
+            </div>
+        </div>
+    </article>
+{% endblock %}
