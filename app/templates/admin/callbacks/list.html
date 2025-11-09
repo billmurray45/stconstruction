@@ -1,0 +1,82 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Заявки на звонок{% endblock %}
+
+{% block active_callbacks %}active{% endblock %}
+
+{% block breadcrumb %}
+<a href="/admin/">Главная</a> › Заявки на звонок
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Заявки на обратный звонок</h1>
+</div>
+
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Имя</th>
+                <th>Телефон</th>
+                <th>Статус</th>
+                <th>Дата получения</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cb in callbacks %}
+            <tr>
+                <td>{{ cb.id }}</td>
+                <td>{{ cb.name }}</td>
+                <td><a href="tel:{{ cb.phone }}">{{ cb.phone }}</a></td>
+                <td>
+                    <span class="status-badge status-{{ cb.status.name.lower() }}">
+                        {{ cb.status.value }}
+                    </span>
+                </td>
+                <td>{{ cb.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px;">Заявок пока нет.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_styles %}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
+.page-title{font-size:28px;color:#333;font-weight:400}
+.table-container{background:#fff;border:1px solid #ddd;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.05);overflow-x:auto}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:12px 15px;text-align:left;border-bottom:1px solid #ddd}
+.table th{background:#f8f9fa;font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px}
+.table tbody tr:last-child td{border-bottom:none}
+.table tbody tr:hover{background-color:#f1f1f1}
+.table a{color:#417690;text-decoration:none}
+.table a:hover{text-decoration:underline}
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+.status-new {
+    background-color: #e3f2fd;
+    color: #1e88e5;
+}
+.status-contacted {
+    background-color: #fff3e0;
+    color: #fb8c00;
+}
+.status-closed {
+    background-color: #e8f5e9;
+    color: #388e3c;
+}
+{% endblock %}

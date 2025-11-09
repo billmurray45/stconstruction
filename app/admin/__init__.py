@@ -11,6 +11,7 @@ from .users import router as users_router
 from .cities import router as cities_router
 from .projects import router as projects_router
 from .settings import router as settings_router
+from .callbacks import router as callbacks_router
 
 # Register routers
 admin_router.include_router(auth_router)
@@ -20,5 +21,6 @@ admin_router.include_router(users_router)
 admin_router.include_router(cities_router)
 admin_router.include_router(projects_router)
 admin_router.include_router(settings_router)
+admin_router.include_router(callbacks_router)
 
 __all__ = ["admin_router"]
