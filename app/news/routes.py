@@ -50,9 +50,6 @@ async def get_news_by_id_route(
     session: AsyncSession = Depends(get_session)
 ):
     news = await get_news_by_id(session, news_id)
-    if not news:
-        raise HTTPException(status_code=404, detail="Новость не найдена")
-
     site_context = await get_site_settings_context(session)
 
     return templates.TemplateResponse(
@@ -72,9 +69,6 @@ async def get_news_by_slug_route(
     session: AsyncSession = Depends(get_session)
 ):
     news = await get_news_by_slug(session, slug)
-    if not news:
-        raise HTTPException(status_code=404, detail="Новость не найден")
-
     site_context = await get_site_settings_context(session)
 
     return templates.TemplateResponse(
