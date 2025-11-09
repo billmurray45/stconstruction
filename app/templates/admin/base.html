@@ -72,16 +72,20 @@ body{font-family:'Roboto','Lucida Grande','DejaVu Sans','Bitstream Vera Sans',Ve
                 Города
             </a>
 
-            <div class="menu-section-title">Пользователи</div>
-            <a href="/admin/users" class="menu-item {% block active_users %}{% endblock %}">
-                <i class="fas fa-users menu-item-icon"></i>
-                Пользователи
-            </a>
-
             <div class="menu-section-title">Настройки</div>
             <a href="/admin/settings" class="menu-item {% block active_settings %}{% endblock %}">
                 <i class="fas fa-cog menu-item-icon"></i>
                 Настройки сайта
+            </a>
+            <a href="/admin/callbacks" class="menu-item {% block active_callbacks %}{% endblock %}">
+                <i class="fas fa-phone-alt menu-item-icon"></i>
+                Заявки на звонок
+            </a>
+
+            <div class="menu-section-title">Пользователи</div>
+            <a href="/admin/users" class="menu-item {% block active_users %}{% endblock %}">
+                <i class="fas fa-users menu-item-icon"></i>
+                Пользователи
             </a>
         </nav>
     </aside>
