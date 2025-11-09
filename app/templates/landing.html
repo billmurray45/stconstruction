@@ -261,7 +261,8 @@
                 </div>
                 <div class="contact-form">
                     <h3 style="margin-bottom: 20px;">Быстрая связь</h3>
-                    <form>
+                    <form id="callbackForm">
+                        <div id="form-messages" class="form-message"></div>
                         <div class="form-group">
                             <label for="quick-name">Имя</label>
                             <input type="text" id="quick-name" name="name" required>
@@ -270,7 +271,7 @@
                             <label for="quick-phone">Телефон</label>
                             <input type="tel" id="quick-phone" name="phone" required>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Перезвоните мне</button>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Перезвоните мне</button>
                     </form>
                 </div>
             </div>
@@ -320,6 +321,49 @@
     </section>
 
     <script>
+    document.getElementById('callbackForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const name = form.querySelector('input[name="name"]').value;
+        const phone = form.querySelector('input[name="phone"]').value;
+        const messagesDiv = document.getElementById('form-messages');
+        const button = form.querySelector('button[type="submit"]');
+
+        button.disabled = true;
+        button.textContent = 'Отправка...';
+        messagesDiv.style.display = 'none';
+        messagesDiv.className = 'form-message';
+
+        try {
+            const response = await fetch('/request-callback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, phone }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                messagesDiv.textContent = result.message;
+                messagesDiv.classList.add('success');
+                form.reset();
+            } else {
+                messagesDiv.textContent = result.message || 'Произошла ошибка.';
+                messagesDiv.classList.add('error');
+            }
+        } catch (error) {
+            messagesDiv.textContent = 'Сетевая ошибка. Попробуйте позже.';
+            messagesDiv.classList.add('error');
+        } finally {
+            messagesDiv.style.display = 'block';
+            button.disabled = false;
+            button.textContent = 'Перезвоните мне';
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const stats = document.querySelectorAll('.stat-number');
         let animated = false;
