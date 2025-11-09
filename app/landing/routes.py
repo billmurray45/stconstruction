@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
@@ -8,6 +9,8 @@ from app.core.context_processors import get_site_settings_context
 from app.news.service import get_latest_news
 from app.projects.service import ProjectService, CityService
 from app.auth.dependencies import set_current_user_optional
+from .schemas import CallbackRequestCreate
+from .service import LandingService
 
 router = APIRouter(
     dependencies=[Depends(set_current_user_optional)]
@@ -71,3 +74,21 @@ async def project_detail(request: Request, slug: str, session: AsyncSession = De
             **site_context
         }
     )
+
+
+@router.post("/request-callback")
+async def request_callback(
+    data: CallbackRequestCreate,
+    session: AsyncSession = Depends(get_session)
+):
+    try:
+        await LandingService.create_callback_request(session, data)
+        return JSONResponse(
+            status_code=201,
+            content={"message": "Ваша заявка успешно отправлена!"}
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"message": "Произошла ошибка при отправке заявки."}
+        )

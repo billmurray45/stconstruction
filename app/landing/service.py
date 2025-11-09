@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 
+from .models import CallbackRequest
+from .schemas import CallbackRequestCreate
 from .models import SiteSettings
 from .repository import SiteSettingsRepository
 from .schemas import SiteSettingsUpdate
@@ -43,3 +45,16 @@ class SiteSettingsService:
             return existing
 
         return await SiteSettingsRepository.create_default_settings(session)
+
+
+class LandingService:
+    @staticmethod
+    async def create_callback_request(session: AsyncSession, data: CallbackRequestCreate) -> CallbackRequest:
+        new_request = CallbackRequest(
+            name=data.name,
+            phone=data.phone
+        )
+        session.add(new_request)
+        await session.commit()
+        await session.refresh(new_request)
+        return new_request

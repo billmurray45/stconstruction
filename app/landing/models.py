@@ -1,7 +1,10 @@
+import enum
+
 from datetime import datetime
 from typing import Optional
 from sqlalchemy import String, Text, JSON
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Enum, func
 
 from app.core.database import Base
 
@@ -52,3 +55,31 @@ class SiteSettings(Base):
 
     def __repr__(self):
         return f"<SiteSettings(company={self.company_name})>"
+
+
+class CallbackRequestStatus(str, enum.Enum):
+    """Статус заявки на обратный звонок"""
+    NEW = "Новая"
+    CONTACTED = "В работе"
+    CLOSED = "Завершено"
+
+
+class CallbackRequest(Base):
+    __tablename__ = "callback_requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    phone: Mapped[str] = mapped_column(String(50), nullable=False)
+    status: Mapped[CallbackRequestStatus] = mapped_column(
+        Enum(CallbackRequestStatus), 
+        default=CallbackRequestStatus.NEW, 
+        nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        default=func.now(), 
+        server_default=func.now()
+    )
+
+    def __repr__(self):
+        return f"<CallbackRequest(id={self.id}, name='{self.name}', status='{self.status.value}')>"
+
