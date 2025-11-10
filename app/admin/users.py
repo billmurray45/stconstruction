@@ -2,8 +2,9 @@ from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_session
-from app.core.templates import templates
+from app.core.config.database import get_session
+from app.core.web.templates import templates
+
 from app.auth.dependencies import require_superuser
 from app.users.models import User
 from app.users.repository import UserRepository

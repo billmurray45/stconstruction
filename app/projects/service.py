@@ -189,7 +189,9 @@ class ProjectService:
             project.completion_date = project_data.completion_date
         if project_data.sold_percent is not None:
             project.sold_percent = project_data.sold_percent
-        if project_data.images is not None:
+        # Images обновляем всегда когда присутствует в схеме (даже если None)
+        # Это позволяет удалять все изображения передавая images=None
+        if hasattr(project_data, 'images') and 'images' in project_data.model_fields_set:
             project.images = project_data.images
         if project_data.is_published is not None:
             project.is_published = project_data.is_published

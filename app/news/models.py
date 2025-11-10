@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import String, DateTime, Text, Boolean, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.database import Base
+from app.core.config.database import Base
 
 
 class News(Base):

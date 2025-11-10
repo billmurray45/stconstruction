@@ -6,7 +6,7 @@ from sqlalchemy import String, Text, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Enum, func
 
-from app.core.database import Base
+from app.core.config.database import Base
 
 
 class SiteSettings(Base):

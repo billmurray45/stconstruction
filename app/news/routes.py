@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path
 
-from app.core.database import get_session
-from app.core.templates import templates
-from app.core.context_processors import get_site_settings_context
+from app.core.config.database import get_session
+from app.core.web.templates import templates
+from app.core.web.context_processors import get_site_settings_context
 from app.auth.dependencies import set_current_user_optional
 
 from .service import (

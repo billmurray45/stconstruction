@@ -1,6 +1,5 @@
 import asyncio
 from logging.config import fileConfig
-import os
 import sys
 from pathlib import Path
 
@@ -13,7 +12,7 @@ from alembic import context
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from app.core.config import settings  # noqa: E402
-from app.core.database import Base  # noqa: E402
+from app.core.config.database import Base  # noqa: E402
 
 from app.users.models import User  # noqa: E402, F401
 from app.news.models import News  # noqa: E402, F401
@@ -29,7 +28,7 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    """Подключаемся к БД через настройки в app/core/config.py"""
+    """Подключаемся к БД через настройки в app/core/settings.py"""
     return settings.db_url(async_fallback=True)
 
 

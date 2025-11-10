@@ -6,7 +6,7 @@ from typing import Optional, List
 from sqlalchemy import String, DateTime, Text, Boolean, Integer, Enum, ForeignKey, JSON, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.database import Base
+from app.core.config.database import Base
 
 
 class ProjectClass(str, enum.Enum):
