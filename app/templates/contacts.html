@@ -116,6 +116,7 @@
                 <p class="form-description">Заполните форму и мы свяжемся с вами в ближайшее время</p>
 
                 <form class="contact-form" id="contactForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-group">
                         <label for="name">Ваше имя *</label>
                         <input type="text" id="name" name="name" required class="form-control">
