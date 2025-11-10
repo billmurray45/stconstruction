@@ -7,7 +7,14 @@ class Settings(BaseSettings):
     DB_NAME: str
     DB_USER: str
     DB_PASSWORD: str
+
     SECRET_KEY: str
+
+    ENVIRONMENT: str = "development"
+
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT == "production"
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
