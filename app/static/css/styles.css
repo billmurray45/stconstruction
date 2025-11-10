@@ -289,8 +289,11 @@ to{opacity:1}
 .modern-project-card:hover{box-shadow:0 10px 50px rgba(0,0,0,0.12)}
 .project-left{padding:40px;display:flex;flex-direction:column;justify-content:center}
 .project-class{display:inline-block;padding:6px 16px;background:#f5f5f5;color:#666;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;border-radius:20px;margin-bottom:16px;width:fit-content}
-.project-class.comfort{background:#e8f5e9;color:#2e7d32}
-.project-class.premium{background:#fff3e0;color:#e65100}
+.project-class.economy{background:#e8f5e9;color:#388e3c}
+.project-class.comfort{background:#e3f2fd;color:#1976d2}
+.project-class.business{background:#fff3e0;color:#f57c00}
+.project-class.premium{background:#f3e5f5;color:#7b1fa2}
+.project-class.elite{background:#fce4ec;color:#c2185b}
 .project-title{font-size:2rem;font-weight:700;color:#1a1a1a;margin-bottom:8px;line-height:1.2}
 .project-subtitle{font-size:1rem;color:#666;margin-bottom:30px}
 .project-meta{display:flex;flex-direction:column;gap:12px;margin-bottom:30px}
@@ -369,9 +372,11 @@ to{opacity:1}
 .project-hero{position:relative;min-height:500px;background:linear-gradient(135deg,#2c5f7a 0%,#1a3d50 100%);background-size:cover;background-position:center;color:var(--white);padding:120px 0 60px}
 .project-hero-content{position:relative;z-index:2}
 .project-badge{display:inline-block;padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:20px;font-size:0.85rem;font-weight:600;margin-bottom:15px;backdrop-filter:blur(10px)}
-.project-badge.comfort{background:rgba(76,175,80,0.2);border:1px solid rgba(76,175,80,0.4)}
-.project-badge.premium{background:rgba(255,193,7,0.2);border:1px solid rgba(255,193,7,0.4)}
-.project-badge.business{background:rgba(33,150,243,0.2);border:1px solid rgba(33,150,243,0.4)}
+.project-badge.economy{background:rgba(76,175,80,0.2);border:1px solid rgba(76,175,80,0.4)}
+.project-badge.comfort{background:rgba(33,150,243,0.2);border:1px solid rgba(33,150,243,0.4)}
+.project-badge.business{background:rgba(255,152,0,0.2);border:1px solid rgba(255,152,0,0.4)}
+.project-badge.premium{background:rgba(156,39,176,0.2);border:1px solid rgba(156,39,176,0.4)}
+.project-badge.elite{background:rgba(233,30,99,0.2);border:1px solid rgba(233,30,99,0.4)}
 .project-hero h1{font-size:3rem;margin-bottom:15px;font-weight:700}
 .project-hero .subtitle{font-size:1.3rem;margin-bottom:30px;opacity:0.9}
 .project-meta-hero{display:flex;flex-wrap:wrap;gap:30px;margin-top:30px}
