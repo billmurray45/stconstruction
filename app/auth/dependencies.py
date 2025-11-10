@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import Request, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_session
+from app.core.config.database import get_session
 from app.users.models import User
 from app.users.repository import UserRepository
 

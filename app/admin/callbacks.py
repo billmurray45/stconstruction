@@ -3,8 +3,9 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.core.database import get_session
-from app.core.templates import templates
+from app.core.config.database import get_session
+from app.core.web.templates import templates
+
 from app.auth.dependencies import require_superuser
 from app.users.models import User
 from app.landing.models import CallbackRequest

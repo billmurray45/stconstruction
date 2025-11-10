@@ -7,9 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List
 from pathlib import Path
 
-from app.core.database import get_session
-from app.core.templates import templates
-from app.core.utils import generate_slug
+from app.core.config.database import get_session
+from app.core.web.templates import templates
+from app.core.utils.helpers import generate_slug
+from app.core.secutiry.file_validator import validate_multiple_images, save_uploaded_file, FileValidationError
+
 from app.users.models import User
 from app.auth.dependencies import require_superuser
 from app.projects.service import ProjectService, CityService
@@ -85,17 +87,21 @@ async def admin_project_add(
         # Обработка загруженных изображений
         image_data = None
         if images and images[0].filename:
+            # Валидация всех изображений
+            await validate_multiple_images(
+                images,
+                max_files=10,
+                field_name="изображения проекта"
+            )
+
             image_urls = []
             for image in images:
                 # Генерируем уникальное имя файла
-                file_extension = os.path.splitext(image.filename)[1]
+                file_extension = os.path.splitext(image.filename)[1].lower()
                 unique_filename = f"{uuid.uuid4()}{file_extension}"
-                file_path = UPLOAD_DIR / unique_filename
 
                 # Сохраняем файл
-                with open(file_path, "wb") as buffer:
-                    content = await image.read()
-                    buffer.write(content)
+                await save_uploaded_file(image, UPLOAD_DIR, unique_filename)
 
                 # Добавляем URL в список
                 image_urls.append(f"/static/uploads/projects/{unique_filename}")
@@ -120,6 +126,11 @@ async def admin_project_add(
         )
         await ProjectService.create_project(session, project_data)
         return RedirectResponse(url="/admin/projects?success=created", status_code=303)
+    except FileValidationError as e:
+        return RedirectResponse(
+            url=f"/admin/projects/add?error={e.detail}",
+            status_code=303
+        )
     except Exception as e:
         return RedirectResponse(
             url=f"/admin/projects/add?error={str(e)}",
@@ -193,14 +204,19 @@ async def admin_project_edit(
 
         # Добавляем новые изображения
         if new_images and new_images[0].filename:
-            for image in new_images:
-                file_extension = os.path.splitext(image.filename)[1]
-                unique_filename = f"{uuid.uuid4()}{file_extension}"
-                file_path = UPLOAD_DIR / unique_filename
+            # Валидация новых изображений
+            await validate_multiple_images(
+                new_images,
+                max_files=10,
+                field_name="новые изображения"
+            )
 
-                with open(file_path, "wb") as buffer:
-                    content = await image.read()
-                    buffer.write(content)
+            for image in new_images:
+                file_extension = os.path.splitext(image.filename)[1].lower()
+                unique_filename = f"{uuid.uuid4()}{file_extension}"
+
+                # Сохраняем файл
+                await save_uploaded_file(image, UPLOAD_DIR, unique_filename)
 
                 kept_urls.append(f"/static/uploads/projects/{unique_filename}")
 
@@ -223,6 +239,11 @@ async def admin_project_edit(
         )
         await ProjectService.update_project(session, project_id, project_data)
         return RedirectResponse(url="/admin/projects?success=updated", status_code=303)
+    except FileValidationError as e:
+        return RedirectResponse(
+            url=f"/admin/projects/{project_id}/edit?error={e.detail}",
+            status_code=303
+        )
     except Exception as e:
         return RedirectResponse(
             url=f"/admin/projects/{project_id}/edit?error={str(e)}",

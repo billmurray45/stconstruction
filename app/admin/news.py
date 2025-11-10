@@ -3,12 +3,13 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path
 
-import shutil
 import uuid
 
-from app.core.database import get_session
-from app.core.templates import templates
-from app.core.utils import generate_slug
+from app.core.config.database import get_session
+from app.core.web.templates import templates
+from app.core.utils.helpers import generate_slug
+from app.core.secutiry.file_validator import validate_image_upload, save_uploaded_file, FileValidationError
+
 from app.auth.dependencies import require_superuser
 from app.users.models import User
 from app.news.service import (
@@ -75,17 +76,16 @@ async def admin_news_add(
             slug = generate_slug(title)
 
         if image and image.filename:
+            # Валидация загружаемого изображения
+            await validate_image_upload(image, field_name="изображение новости")
+
             # Генерация уникального имени для файла
-            file_extension = Path(image.filename).suffix
+            file_extension = Path(image.filename).suffix.lower()
             unique_filename = f"{uuid.uuid4()}{file_extension}"
-            file_path = Path("app/static/uploads/news") / unique_filename
 
-            # Если папка не существует, создаем его
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # Сохраняем файл
-            with file_path.open("wb") as buffer:
-                shutil.copyfileobj(image.file, buffer)
+            # Сохранение файла
+            destination_dir = Path("app/static/uploads/news")
+            await save_uploaded_file(image, destination_dir, unique_filename)
 
             image_path = f"uploads/news/{unique_filename}"
         else:
@@ -104,6 +104,23 @@ async def admin_news_add(
 
         return RedirectResponse(url="/admin/news?success=created", status_code=302)
 
+    except FileValidationError as e:
+        return templates.TemplateResponse(
+            "admin/news/add.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "error": e.detail,
+                "form_data": {
+                    "title": title,
+                    "slug": slug,
+                    "description": description,
+                    "content": content,
+                    "is_published": is_published
+                }
+            },
+            status_code=400
+        )
     except HTTPException as e:
         return templates.TemplateResponse(
             "admin/news/add.html",
@@ -186,14 +203,15 @@ async def admin_news_edit(
         # Handle image upload if new image provided
         image_path = news.image_path
         if image and image.filename:
-            file_extension = Path(image.filename).suffix
+            # Валидация загружаемого изображения
+            await validate_image_upload(image, field_name="изображение новости")
+
+            file_extension = Path(image.filename).suffix.lower()
             unique_filename = f"{uuid.uuid4()}{file_extension}"
-            file_path = Path("app/static/uploads/news") / unique_filename
 
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-
-            with file_path.open("wb") as buffer:
-                shutil.copyfileobj(image.file, buffer)
+            # Сохранение файла
+            destination_dir = Path("app/static/uploads/news")
+            await save_uploaded_file(image, destination_dir, unique_filename)
 
             image_path = f"uploads/news/{unique_filename}"
 
@@ -216,6 +234,18 @@ async def admin_news_edit(
 
         return RedirectResponse(url="/admin/news?success=updated", status_code=302)
 
+    except FileValidationError as e:
+        news = await get_news_by_id(session, news_id)
+        return templates.TemplateResponse(
+            "admin/news/edit.html",
+            {
+                "request": request,
+                "current_user": current_user,
+                "news": news,
+                "error": e.detail
+            },
+            status_code=400
+        )
     except HTTPException as e:
         news = await get_news_by_id(session, news_id)
         return templates.TemplateResponse(

@@ -7,8 +7,10 @@ from pathlib import Path
 import uuid
 import os
 
-from app.core.database import get_session
-from app.core.templates import templates
+from app.core.config.database import get_session
+from app.core.web.templates import templates
+from app.core.secutiry.file_validator import validate_image_upload, save_uploaded_file, FileValidationError, MAX_LOGO_SIZE
+
 from app.users.models import User
 from app.auth.dependencies import require_superuser
 from app.landing.service import SiteSettingsService
@@ -73,13 +75,18 @@ async def admin_settings_update(
         # Обработка логотипа
         logo_path = settings.logo_path
         if logo and logo.filename:
-            file_extension = os.path.splitext(logo.filename)[1]
-            unique_filename = f"logo_{uuid.uuid4()}{file_extension}"
-            file_path = UPLOAD_DIR / unique_filename
+            # Валидация логотипа (меньший лимит размера)
+            await validate_image_upload(
+                logo,
+                max_size=MAX_LOGO_SIZE,
+                field_name="логотип"
+            )
 
-            with open(file_path, "wb") as buffer:
-                content = await logo.read()
-                buffer.write(content)
+            file_extension = os.path.splitext(logo.filename)[1].lower()
+            unique_filename = f"logo_{uuid.uuid4()}{file_extension}"
+
+            # Сохранение файла
+            await save_uploaded_file(logo, UPLOAD_DIR, unique_filename)
 
             logo_path = f"/static/uploads/settings/{unique_filename}"
 
@@ -122,6 +129,11 @@ async def admin_settings_update(
         await SiteSettingsService.update_settings(session, settings_data)
         return RedirectResponse(url="/admin/settings?success=updated", status_code=303)
 
+    except FileValidationError as e:
+        return RedirectResponse(
+            url=f"/admin/settings?error={e.detail}",
+            status_code=303
+        )
     except Exception as e:
         return RedirectResponse(
             url=f"/admin/settings?error={str(e)}",

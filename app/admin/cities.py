@@ -2,9 +2,10 @@ from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_session
-from app.core.templates import templates
-from app.core.utils import generate_slug
+from app.core.config.database import get_session
+from app.core.web.templates import templates
+from app.core.utils.helpers import generate_slug
+
 from app.users.models import User
 from app.auth.dependencies import require_superuser
 from app.projects.service import CityService
