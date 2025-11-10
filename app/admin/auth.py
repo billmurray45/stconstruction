@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
 from app.core.templates import templates
+from app.core.rate_limit import limiter
 from app.auth.service import authenticate_user
 
 
@@ -26,6 +27,7 @@ async def admin_login_page(request: Request):
 
 
 @router.post("/login")
+@limiter.limit("5/minute")  # 5 admin login attempts per minute per IP
 async def admin_login(
     request: Request,
     email: str = Form(...),

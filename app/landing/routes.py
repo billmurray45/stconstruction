@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_session
 from app.core.templates import templates
 from app.core.context_processors import get_site_settings_context
+from app.core.rate_limit import limiter
 from app.news.service import get_latest_news
 from app.projects.service import ProjectService, CityService
 from app.auth.dependencies import set_current_user_optional
@@ -77,7 +78,9 @@ async def project_detail(request: Request, slug: str, session: AsyncSession = De
 
 
 @router.post("/request-callback")
+@limiter.limit("10/hour")  # 10 callback requests per hour per IP
 async def request_callback(
+    request: Request,
     data: CallbackRequestCreate,
     session: AsyncSession = Depends(get_session)
 ):

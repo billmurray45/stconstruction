@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
+from app.core.rate_limit import limiter
 from app.auth.service import authenticate_user
 from app.auth.dependencies import get_current_user
 from app.users.models import User
@@ -11,6 +12,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/login")
+@limiter.limit("5/minute")  # 5 login attempts per minute per IP
 async def login(
     request: Request,
     email: str = Form(...),
