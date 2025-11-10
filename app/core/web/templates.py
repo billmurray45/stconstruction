@@ -1,5 +1,5 @@
 from fastapi.templating import Jinja2Templates
-from app.core.csrf import generate_csrf_token
+from app.core.secutiry.csrf import generate_csrf_token
 
 
 class CustomJinja2Templates(Jinja2Templates):
