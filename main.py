@@ -1,10 +1,11 @@
 import uvicorn
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.sessions import SessionMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette_csrf import CSRFMiddleware
+from contextlib import asynccontextmanager
 
 from app.core.config import settings
 from app.core.database import get_session
@@ -16,20 +17,41 @@ from app.auth.routes import router as auth_router
 from app.news.routes import router as news_router
 from app.landing.routes import router as landing_router
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async for session in get_session():
+        try:
+            await SiteSettingsService.initialize_settings(session)
+        finally:
+            break
+    yield
+
 app = FastAPI(
     title="Standart Construction",
     description="SSR Landing website for Standart Construction",
     version="1.0",
+    lifespan=lifespan,
 )
 
 
+# Session Middleware
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
     session_cookie="stconstruction_session",
     max_age=14 * 24 * 60 * 60,
     same_site="lax",
-    https_only=False  # Изменить на True в Production
+    https_only=settings.is_production
+)
+
+# CSRF Protection
+app.add_middleware(
+    CSRFMiddleware,
+    secret=settings.SECRET_KEY,
+    cookie_name="csrf_token",
+    cookie_secure=settings.is_production,
+    cookie_samesite="lax",
 )
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -38,17 +60,6 @@ app.include_router(users_router)
 app.include_router(auth_router)
 app.include_router(news_router)
 app.include_router(admin_router)
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Инициализация при старте приложения"""
-    async for session in get_session():
-        try:
-            # Инициализируем настройки сайта
-            await SiteSettingsService.initialize_settings(session)
-        finally:
-            break
 
 
 if __name__ == "__main__":

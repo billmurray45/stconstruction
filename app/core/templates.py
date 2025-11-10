@@ -9,10 +9,15 @@ class CustomJinja2Templates(Jinja2Templates):
         if context is None:
             context = {}
 
-        # Автоматически добавляем current_user из request.state
         request = context.get("request")
-        if request and hasattr(request.state, "current_user"):
-            context["current_user"] = request.state.current_user
+        if request:
+            # Автоматически добавляем current_user из request.state
+            if hasattr(request.state, "current_user"):
+                context["current_user"] = request.state.current_user
+
+            # Автоматически добавляем csrf_token
+            if hasattr(request.state, "csrf_token"):
+                context["csrf_token"] = request.state.csrf_token
 
         return super().TemplateResponse(name, context, **kwargs)
 
