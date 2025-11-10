@@ -10,6 +10,8 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
 
+    REDIS_URL: str = "redis://localhost:6379"
+
     ENVIRONMENT: str = "development"
 
     @property
