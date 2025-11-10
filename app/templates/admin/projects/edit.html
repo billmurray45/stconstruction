@@ -235,26 +235,30 @@
         descriptionTextarea.value = quill.root.innerHTML;
     });
 
-    // Синхронизация при отправке формы
-    document.querySelector('form').addEventListener('submit', function() {
-        descriptionTextarea.value = quill.root.innerHTML;
-    });
-
     function toggleImageDelete(button) {
         const imageContainer = button.closest('.current-image');
-        const hiddenInput = imageContainer.querySelector('input[name="keep_images"]');
+        // Ищем input по любому из имен
+        let hiddenInput = imageContainer.querySelector('input[name="keep_images"]');
+        if (!hiddenInput) {
+            hiddenInput = imageContainer.querySelector('input[name="delete_images"]');
+        }
 
         if (imageContainer.classList.contains('marked-delete')) {
             // Восстановить изображение
             imageContainer.classList.remove('marked-delete');
-            hiddenInput.disabled = false;
+            hiddenInput.name = 'keep_images';  // Восстанавливаем имя
             button.innerHTML = '<i class="fas fa-trash"></i>';
         } else {
             // Отметить для удаления
             imageContainer.classList.add('marked-delete');
-            hiddenInput.disabled = true;
+            hiddenInput.name = 'delete_images';  // Меняем имя чтобы не попало в keep_images
             button.innerHTML = '<i class="fas fa-undo"></i>';
         }
     }
+
+    // При отправке формы синхронизируем Quill
+    document.querySelector('form').addEventListener('submit', function(e) {
+        descriptionTextarea.value = quill.root.innerHTML;
+    });
 </script>
 {% endblock %}

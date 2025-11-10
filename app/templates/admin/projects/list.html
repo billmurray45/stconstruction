@@ -27,9 +27,11 @@
 .status-published{background:#d4edda;color:#155724}
 .status-draft{background:#fff3cd;color:#856404}
 .class-badge{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;text-transform:uppercase}
+.class-economy{background:#e8f5e9;color:#388e3c}
 .class-comfort{background:#e3f2fd;color:#1976d2}
-.class-premium{background:#f3e5f5;color:#7b1fa2}
 .class-business{background:#fff3e0;color:#f57c00}
+.class-premium{background:#f3e5f5;color:#7b1fa2}
+.class-elite{background:#fce4ec;color:#c2185b}
 .action-buttons{display:flex;gap:8px}
 .btn-icon{padding:6px 10px;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;transition:all .2s ease;color:#417690;text-decoration:none;font-size:14px}
 .btn-icon:hover{background:#417690;color:#fff;border-color:#417690}
@@ -100,12 +102,16 @@
                 </td>
                 <td>{{ project.city.name if project.city else '—' }}</td>
                 <td>
-                    {% if project.project_class.value == 'comfort' %}
+                    {% if project.project_class.value == 'economy' %}
+                    <span class="class-badge class-economy">Эконом</span>
+                    {% elif project.project_class.value == 'comfort' %}
                     <span class="class-badge class-comfort">Комфорт</span>
-                    {% elif project.project_class.value == 'premium' %}
-                    <span class="class-badge class-premium">Премиум</span>
                     {% elif project.project_class.value == 'business' %}
                     <span class="class-badge class-business">Бизнес</span>
+                    {% elif project.project_class.value == 'premium' %}
+                    <span class="class-badge class-premium">Премиум</span>
+                    {% elif project.project_class.value == 'elite' %}
+                    <span class="class-badge class-elite">Элитный</span>
                     {% endif %}
                 </td>
                 <td>

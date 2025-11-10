@@ -39,8 +39,8 @@
                 {% for project in projects %}
                 <div class="modern-project-card" data-city="{{ project.city.slug if project.city else 'unknown' }}">
                     <div class="project-left">
-                        <span class="project-class {% if project.project_class.value == 'comfort' %}comfort{% elif project.project_class.value == 'premium' %}premium{% elif project.project_class.value == 'business' %}business{% endif %}">
-                            {% if project.project_class.value == 'comfort' %}Комфорт-класс{% elif project.project_class.value == 'premium' %}Премиум-класс{% elif project.project_class.value == 'business' %}Бизнес-класс{% endif %}
+                        <span class="project-class {% if project.project_class.value == 'economy' %}economy{% elif project.project_class.value == 'comfort' %}comfort{% elif project.project_class.value == 'business' %}business{% elif project.project_class.value == 'premium' %}premium{% elif project.project_class.value == 'elite' %}elite{% endif %}">
+                            {% if project.project_class.value == 'economy' %}Эконом-класс{% elif project.project_class.value == 'comfort' %}Комфорт-класс{% elif project.project_class.value == 'business' %}Бизнес-класс{% elif project.project_class.value == 'premium' %}Премиум-класс{% elif project.project_class.value == 'elite' %}Элитный-класс{% endif %}
                         </span>
                         <h3 class="project-title">{{ project.title }}</h3>
                         {% if project.subtitle %}
@@ -90,7 +90,7 @@
                         </div>
                         {% endif %}
                         <div class="project-carousel" id="project-{{ project.id }}">
-                            {% if project.images and project.images.urls %}
+                            {% if project.images and project.images.urls and project.images.urls|length > 0 %}
                                 {% for image_url in project.images.urls %}
                                 <img src="{{ image_url }}" alt="{{ project.title }} {{ loop.index }}" class="project-image-main carousel-image {% if loop.first %}active{% endif %}">
                                 {% endfor %}
