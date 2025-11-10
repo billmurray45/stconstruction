@@ -9,7 +9,9 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.csrf import SimpleCSRFMiddleware
 from app.core.database import get_session
+from app.core.rate_limit import limiter, rate_limit_exceeded_handler
 from app.landing.service import SiteSettingsService
+from slowapi.errors import RateLimitExceeded
 
 from app.admin import admin_router
 from app.users.routes import router as users_router
@@ -34,6 +36,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+# Rate Limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 # CSRF Protection
 app.add_middleware(
