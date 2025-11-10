@@ -57,6 +57,7 @@
 
 <div class="form-container">
     <form method="post" action="/admin/projects/{{ project.id }}/edit" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
         <div class="form-section">
             <div class="section-title">Основная информация</div>

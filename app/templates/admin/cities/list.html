@@ -102,6 +102,7 @@
                         </a>
                         <form method="post" action="/admin/cities/{{ city.id }}/delete" style="display: inline;"
                               onsubmit="return confirm('Вы уверены, что хотите удалить этот город?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                             <button type="submit" class="btn-icon delete" title="Удалить">
                                 <i class="fas fa-trash"></i>
                             </button>

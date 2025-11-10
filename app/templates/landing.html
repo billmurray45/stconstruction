@@ -262,6 +262,7 @@
                 <div class="contact-form">
                     <h3 style="margin-bottom: 20px;">Быстрая связь</h3>
                     <form id="callbackForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <div id="form-messages" class="form-message"></div>
                         <div class="form-group">
                             <label for="quick-name">Имя</label>
@@ -336,7 +337,7 @@
         messagesDiv.className = 'form-message';
 
         try {
-            const response = await fetch('/request-callback', {
+            const response = await fetchWithCsrf('/request-callback', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

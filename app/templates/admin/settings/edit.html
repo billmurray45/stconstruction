@@ -94,6 +94,8 @@
     </div>
 
     <form method="post" action="/admin/settings" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
         <div class="tabs-content">
 
             <!-- Tab 1: Основная информация -->

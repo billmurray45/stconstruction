@@ -4,10 +4,10 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.sessions import SessionMiddleware
-from starlette_csrf import CSRFMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
+from app.core.csrf import SimpleCSRFMiddleware
 from app.core.database import get_session
 from app.landing.service import SiteSettingsService
 
@@ -35,6 +35,14 @@ app = FastAPI(
 )
 
 
+# CSRF Protection
+app.add_middleware(
+    SimpleCSRFMiddleware,
+    token_name="csrf_token",
+    header_name="x-csrf-token",
+    exempt_paths=["/static"],
+)
+
 # Session Middleware
 app.add_middleware(
     SessionMiddleware,
@@ -43,15 +51,6 @@ app.add_middleware(
     max_age=14 * 24 * 60 * 60,
     same_site="lax",
     https_only=settings.is_production
-)
-
-# CSRF Protection
-app.add_middleware(
-    CSRFMiddleware,
-    secret=settings.SECRET_KEY,
-    cookie_name="csrf_token",
-    cookie_secure=settings.is_production,
-    cookie_samesite="lax",
 )
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")

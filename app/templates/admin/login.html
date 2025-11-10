@@ -136,6 +136,7 @@
         {% endif %}
 
         <form method="post" action="/admin/login">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input

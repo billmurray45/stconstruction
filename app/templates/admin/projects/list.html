@@ -134,12 +134,14 @@
                             <i class="fas fa-edit"></i>
                         </a>
                         <form method="post" action="/admin/projects/{{ project.id }}/toggle-publish" style="display: inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                             <button type="submit" class="btn-icon publish" title="{% if project.is_published %}Снять с публикации{% else %}Опубликовать{% endif %}">
                                 <i class="fas {% if project.is_published %}fa-eye-slash{% else %}fa-eye{% endif %}"></i>
                             </button>
                         </form>
                         <form method="post" action="/admin/projects/{{ project.id }}/delete" style="display: inline;"
                               onsubmit="return confirm('Вы уверены, что хотите удалить этот проект?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                             <button type="submit" class="btn-icon delete" title="Удалить">
                                 <i class="fas fa-trash"></i>
                             </button>

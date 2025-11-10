@@ -52,6 +52,8 @@ input[type="file"]{display:none}
 
 <div class="form-wrapper">
     <form method="post" action="/admin/news/add" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
         <div class="form-group">
             <label for="title" class="form-label required">Заголовок</label>
             <input

@@ -3,7 +3,7 @@ const AuthAPI = {
     // Регистрация пользователя
     async register(formData) {
         try {
-            const response = await fetch('/auth/register', {
+            const response = await fetchWithCsrf('/auth/register', {
                 method: 'POST',
                 body: formData
             });
@@ -19,7 +19,7 @@ const AuthAPI = {
     // Авторизация пользователя
     async login(formData) {
         try {
-            const response = await fetch('/auth/login', {
+            const response = await fetchWithCsrf('/auth/login', {
                 method: 'POST',
                 body: formData
             });
@@ -35,7 +35,7 @@ const AuthAPI = {
     // Выход из системы
     async logout() {
         try {
-            const response = await fetch('/auth/logout', {
+            const response = await fetchWithCsrf('/auth/logout', {
                 method: 'POST'
             });
 
