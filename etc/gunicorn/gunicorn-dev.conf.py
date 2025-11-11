@@ -5,7 +5,7 @@ import multiprocessing
 import os
 
 # Server socket
-bind = "127.0.0.1:8001"  # Dev port
+bind = "0.0.0.0:8001"  # Bind to all interfaces for Docker
 backlog = 2048
 
 # Worker processes (less workers for dev)
