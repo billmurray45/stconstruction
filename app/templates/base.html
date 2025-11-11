@@ -15,6 +15,7 @@
     <meta name="twitter:title" content="{% block twitter_title %}{{ site.meta_title if site and site.meta_title else 'Standart Construction' }}{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}{{ site.meta_description if site and site.meta_description else 'Строительство жилых комплексов' }}{% endblock %}">
 
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='images/favicon.ico') }}">
     <link rel="preconnect" href="https://fonts.cdnfonts.com">
     <link href="https://fonts.cdnfonts.com/css/gilroy-bold" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
