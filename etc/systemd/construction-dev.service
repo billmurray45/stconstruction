@@ -7,15 +7,15 @@ After=network.target postgresql.service redis.service
 Type=notify
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/construction-dev
+WorkingDirectory=/var/www/construction-dev/stconstruction
 
 # Environment
-Environment="PATH=/var/www/construction-dev/venv/bin"
-EnvironmentFile=/var/www/construction-dev/.env
+Environment="PATH=/var/www/construction-dev/stconstruction/venv/bin"
+EnvironmentFile=/var/www/construction-dev/stconstruction/.env
 
 # Main process
-ExecStart=/var/www/construction-dev/venv/bin/gunicorn \
-    --config /var/www/construction-dev/etc/gunicorn/gunicorn-dev.conf.py \
+ExecStart=/var/www/construction-dev/stconstruction/venv/bin/gunicorn \
+    --config /var/www/construction-dev/stconstruction/etc/gunicorn/gunicorn-dev.conf.py \
     main:app
 
 # Restart policy
@@ -27,8 +27,8 @@ NoNewPrivileges=true
 PrivateTmp=true
 
 # Logging
-StandardOutput=append:/var/www/construction-dev/logs/gunicorn-access.log
-StandardError=append:/var/www/construction-dev/logs/gunicorn-error.log
+StandardOutput=append:/var/www/construction-dev/stconstruction/logs/gunicorn-access.log
+StandardError=append:/var/www/construction-dev/stconstruction/logs/gunicorn-error.log
 
 # Resource limits
 LimitNOFILE=65536
