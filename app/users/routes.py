@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config.database import get_session
-from app.core.secutiry.rate_limit import limiter
+from app.core.security.rate_limit import limiter
 from app.users.schemas import RegisterForm
 from app.users.service import create_user
 
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/auth", tags=["Users"])
 
 
 @router.post("/register")
-@limiter.limit("3/hour")  # 3 registrations per hour per IP
+@limiter.limit("3/hour")
 async def register_post(
         request: Request,
         email: str = Form(...),

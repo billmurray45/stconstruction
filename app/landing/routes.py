@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import HTMLResponse
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config.database import get_session
 from app.core.web.templates import templates
 from app.core.web.context_processors import get_site_settings_context
-from app.core.secutiry.rate_limit import limiter
+from app.core.security.rate_limit import limiter
 from app.news.service import get_latest_news
 from app.projects.service import ProjectService, CityService
 from app.auth.dependencies import set_current_user_optional
@@ -42,8 +42,6 @@ async def index(request: Request, session: AsyncSession = Depends(get_session)):
 
 @router.get("/contacts", response_class=HTMLResponse)
 async def contacts(request: Request, session: AsyncSession = Depends(get_session)):
-    """Страница контактов"""
-    # Получаем настройки сайта для отображения контактной информации
     site_context = await get_site_settings_context(session)
 
     return templates.TemplateResponse(
@@ -62,7 +60,6 @@ async def project_detail(request: Request, slug: str, session: AsyncSession = De
 
     # Проверяем, что проект опубликован (если пользователь не админ)
     if not project.is_published and not getattr(request.state, 'current_user', None):
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Проект не найден")
 
     site_context = await get_site_settings_context(session)
@@ -78,7 +75,7 @@ async def project_detail(request: Request, slug: str, session: AsyncSession = De
 
 
 @router.post("/request-callback")
-@limiter.limit("10/hour")  # 10 callback requests per hour per IP
+@limiter.limit("10/hour")
 async def request_callback(
     request: Request,
     data: CallbackRequestCreate,

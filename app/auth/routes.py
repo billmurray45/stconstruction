@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config.database import get_session
-from app.core.secutiry.rate_limit import limiter
+from app.core.security.rate_limit import limiter
 from app.auth.service import authenticate_user
 from app.auth.dependencies import get_current_user
 from app.users.models import User

@@ -10,7 +10,7 @@ from pathlib import Path
 from app.core.config.database import get_session
 from app.core.web.templates import templates
 from app.core.utils.helpers import generate_slug
-from app.core.secutiry.file_validator import validate_multiple_images, save_uploaded_file, FileValidationError
+from app.core.security.file_validator import validate_multiple_images, save_uploaded_file, FileValidationError
 
 from app.users.models import User
 from app.auth.dependencies import require_superuser

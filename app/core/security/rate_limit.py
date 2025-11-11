@@ -8,7 +8,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from app.core.config import settings
+from app.core.config.settings import settings
 
 
 def get_client_identifier(request: Request) -> str:

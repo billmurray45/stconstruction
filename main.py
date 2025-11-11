@@ -6,10 +6,10 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
 
-from app.core.config import settings
-from app.core.secutiry.csrf import SimpleCSRFMiddleware
+from app.core.config.settings import settings
+from app.core.security.csrf import SimpleCSRFMiddleware
 from app.core.config.database import get_session
-from app.core.secutiry.rate_limit import limiter, rate_limit_exceeded_handler
+from app.core.security.rate_limit import limiter, rate_limit_exceeded_handler
 from app.landing.service import SiteSettingsService
 from slowapi.errors import RateLimitExceeded
 

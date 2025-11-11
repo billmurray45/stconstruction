@@ -9,7 +9,7 @@ import os
 
 from app.core.config.database import get_session
 from app.core.web.templates import templates
-from app.core.secutiry.file_validator import validate_image_upload, save_uploaded_file, FileValidationError, MAX_LOGO_SIZE
+from app.core.security.file_validator import validate_image_upload, save_uploaded_file, FileValidationError, MAX_LOGO_SIZE
 
 from app.users.models import User
 from app.auth.dependencies import require_superuser
