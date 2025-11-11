@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16
-    container_name: standart_db
+    container_name: standart_db_dev
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
