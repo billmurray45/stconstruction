@@ -1,4 +1,5 @@
 import uvicorn
+import logging
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -7,6 +8,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.config.settings import settings
+from app.core.config.logging import setup_logging
 from app.core.security.csrf import SimpleCSRFMiddleware
 from app.core.config.database import get_session
 from app.core.security.rate_limit import limiter, rate_limit_exceeded_handler
@@ -22,12 +24,23 @@ from app.landing.routes import router as landing_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    setup_logging()
+    logger = logging.getLogger(__name__)
+    logger.info("Starting Standart Construction application...")
+
+    # Инициализация настроек сайта
     async for session in get_session():
         try:
             await SiteSettingsService.initialize_settings(session)
+            logger.info("Site settings initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize site settings: {e}")
         finally:
             break
+
     yield
+
+    logger.info("Shutting down Standart Construction application...")
 
 app = FastAPI(
     title="Standart Construction",
@@ -46,7 +59,7 @@ app.add_middleware(
     SimpleCSRFMiddleware,
     token_name="csrf_token",
     header_name="x-csrf-token",
-    exempt_paths=["/static"],
+    exempt_paths=["/static", "/health"],
 )
 
 # Session Middleware
@@ -65,6 +78,45 @@ app.include_router(users_router)
 app.include_router(auth_router)
 app.include_router(news_router)
 app.include_router(admin_router)
+
+
+# Health Check Endpoints
+@app.get("/health", tags=["Health"])
+async def health_check():
+    return {
+        "status": "healthy",
+        "service": "construction",
+        "environment": settings.ENVIRONMENT
+    }
+
+
+@app.get("/health/db", tags=["Health"])
+async def health_check_db():
+    try:
+        async for session in get_session():
+            try:
+                # Simple query to check DB connection
+                from sqlalchemy import text
+                result = await session.execute(text("SELECT 1"))
+                result.scalar()
+
+                return {
+                    "status": "healthy",
+                    "service": "construction",
+                    "database": "connected"
+                }
+            finally:
+                break
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Database health check failed: {e}")
+
+        from fastapi import Response
+        return Response(
+            content='{"status": "unhealthy", "database": "disconnected"}',
+            status_code=503,
+            media_type="application/json"
+        )
 
 
 if __name__ == "__main__":

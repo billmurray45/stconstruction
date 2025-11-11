@@ -1,8 +1,10 @@
+import logging
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config.database import get_session
+from app.core.config.logging import log_security_event
 from app.core.web.templates import templates
 
 from app.auth.dependencies import require_superuser
@@ -11,6 +13,7 @@ from app.users.repository import UserRepository
 from app.users.service import update_user_admin, create_user
 from app.users.schemas import RegisterForm
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["Admin Users"])
 
@@ -49,6 +52,7 @@ async def admin_user_add_form(
 
 @router.post("/add")
 async def admin_user_add(
+    request: Request,
     email: str = Form(...),
     username: str = Form(...),
     full_name: str = Form(...),
@@ -70,8 +74,23 @@ async def admin_user_add(
             user.is_superuser = True
             await UserRepository.update_user(session, user)
 
+        # Логируем создание пользователя
+        log_security_event(
+            event_type="admin_user_created",
+            details={
+                "admin_id": current_user.id,
+                "admin_email": current_user.email,
+                "new_user_id": user.id,
+                "new_user_email": email,
+                "is_superuser": is_superuser,
+                "ip": request.client.host if request.client else "unknown"
+            },
+            level="INFO"
+        )
+
         return RedirectResponse(url="/admin/users?success=created", status_code=303)
     except HTTPException as e:
+        logger.warning(f"User creation failed: {e.detail}")
         if e.status_code == 409:
             return RedirectResponse(url="/admin/users/add?error=already_exists", status_code=303)
         elif e.status_code == 400:
@@ -103,6 +122,7 @@ async def admin_user_edit_form(
 
 @router.post("/{user_id}/edit")
 async def admin_user_edit(
+    request: Request,
     user_id: int,
     full_name: str = Form(...),
     email: str = Form(...),
@@ -111,6 +131,11 @@ async def admin_user_edit(
     session: AsyncSession = Depends(get_session)
 ):
     try:
+        # Получаем старые данные для логирования изменений
+        user = await UserRepository.get_user_by_id(session, user_id)
+        old_email = user.email if user else "unknown"
+        old_superuser = user.is_superuser if user else False
+
         await update_user_admin(
             session=session,
             user_id=user_id,
@@ -119,8 +144,29 @@ async def admin_user_edit(
             is_superuser=is_superuser,
             current_user_id=current_user.id
         )
+
+        # Логируем изменения
+        changes = []
+        if old_email != email:
+            changes.append(f"email: {old_email} -> {email}")
+        if old_superuser != is_superuser:
+            changes.append(f"is_superuser: {old_superuser} -> {is_superuser}")
+
+        log_security_event(
+            event_type="admin_user_updated",
+            details={
+                "admin_id": current_user.id,
+                "admin_email": current_user.email,
+                "user_id": user_id,
+                "changes": ", ".join(changes) if changes else "name only",
+                "ip": request.client.host if request.client else "unknown"
+            },
+            level="INFO"
+        )
+
         return RedirectResponse(url="/admin/users?success=updated", status_code=303)
     except HTTPException as e:
+        logger.warning(f"User update failed: {e.detail}")
         if e.status_code == 404:
             return RedirectResponse(url="/admin/users?error=not_found", status_code=303)
         elif e.status_code == 400:
@@ -133,6 +179,7 @@ async def admin_user_edit(
 
 @router.post("/{user_id}/delete")
 async def admin_user_delete(
+    request: Request,
     user_id: int,
     current_user: User = Depends(require_superuser),
     session: AsyncSession = Depends(get_session)
@@ -144,6 +191,23 @@ async def admin_user_delete(
     if user.id == current_user.id:
         return RedirectResponse(url="/admin/users?error=cannot_delete_yourself", status_code=303)
 
+    # Сохраняем данные перед удалением
+    deleted_email = user.email
+    deleted_id = user.id
+
     await UserRepository.delete_user(session, user)
+
+    # Логируем удаление пользователя
+    log_security_event(
+        event_type="admin_user_deleted",
+        details={
+            "admin_id": current_user.id,
+            "admin_email": current_user.email,
+            "deleted_user_id": deleted_id,
+            "deleted_user_email": deleted_email,
+            "ip": request.client.host if request.client else "unknown"
+        },
+        level="WARNING"  # WARNING т.к. это критичная операция
+    )
 
     return RedirectResponse(url="/admin/users?success=deleted", status_code=303)

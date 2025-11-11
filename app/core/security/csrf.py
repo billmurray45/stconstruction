@@ -3,12 +3,16 @@ Simple CSRF Protection Middleware for FastAPI SSR applications
 Works with hidden form fields and session-based tokens
 """
 import secrets
+import logging
 from typing import Callable
 from urllib.parse import parse_qs
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import PlainTextResponse
 from starlette.datastructures import FormData
+from app.core.config.logging import log_security_event
+
+logger = logging.getLogger(__name__)
 
 
 class SimpleCSRFMiddleware(BaseHTTPMiddleware):
@@ -50,6 +54,16 @@ class SimpleCSRFMiddleware(BaseHTTPMiddleware):
 
         if not session_token:
             # No token in session - this shouldn't happen if session middleware is working
+            log_security_event(
+                event_type="csrf_no_session_token",
+                details={
+                    "ip": request.client.host if request.client else "unknown",
+                    "method": request.method,
+                    "endpoint": request.url.path,
+                    "reason": "Token missing from session"
+                },
+                level="ERROR"
+            )
             return PlainTextResponse(
                 "CSRF token missing from session",
                 status_code=403
@@ -89,8 +103,7 @@ class SimpleCSRFMiddleware(BaseHTTPMiddleware):
                     request._receive = new_receive
 
                 except Exception as e:
-                    import logging
-                    logging.error(f"CSRF middleware error parsing form: {e}")
+                    logger.error(f"CSRF middleware error parsing form: {e}")
                     pass
             elif "multipart/form-data" in content_type:
                 # For file uploads, REQUIRE header (JavaScript handles this automatically)
@@ -98,12 +111,33 @@ class SimpleCSRFMiddleware(BaseHTTPMiddleware):
 
         # Validate token
         if not submitted_token:
+            log_security_event(
+                event_type="csrf_token_missing",
+                details={
+                    "ip": request.client.host if request.client else "unknown",
+                    "method": request.method,
+                    "endpoint": request.url.path,
+                    "content_type": request.headers.get("content-type", "unknown"),
+                    "reason": "Token missing from request"
+                },
+                level="WARNING"
+            )
             return PlainTextResponse(
                 "CSRF token missing from request",
                 status_code=403
             )
 
         if not secrets.compare_digest(session_token, submitted_token):
+            log_security_event(
+                event_type="csrf_validation_failed",
+                details={
+                    "ip": request.client.host if request.client else "unknown",
+                    "method": request.method,
+                    "endpoint": request.url.path,
+                    "reason": "Token mismatch"
+                },
+                level="WARNING"
+            )
             return PlainTextResponse(
                 "CSRF token verification failed",
                 status_code=403

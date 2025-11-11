@@ -2,6 +2,7 @@
 Rate Limiting Configuration for FastAPI
 Uses slowapi for request rate limiting
 """
+import logging
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -9,6 +10,9 @@ from slowapi.middleware import SlowAPIMiddleware
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from app.core.config.settings import settings
+from app.core.config.logging import log_security_event
+
+logger = logging.getLogger(__name__)
 
 
 def get_client_identifier(request: Request) -> str:
@@ -38,6 +42,27 @@ def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
     Custom handler for rate limit exceeded errors
     Returns user-friendly JSON response
     """
+    # Получаем идентификатор клиента
+    client_id = get_client_identifier(request)
+
+    # Определяем тип клиента (user или IP)
+    client_type = "user" if client_id.startswith("user:") else "ip"
+    client_value = client_id.split(":", 1)[1] if ":" in client_id else client_id
+
+    # Логируем превышение лимита
+    log_security_event(
+        event_type="rate_limit_exceeded",
+        details={
+            "client_type": client_type,
+            "client_id": client_value,
+            "ip": request.client.host if request.client else "unknown",
+            "method": request.method,
+            "endpoint": request.url.path,
+            "limit_detail": str(exc.detail) if hasattr(exc, 'detail') else "unknown"
+        },
+        level="WARNING"
+    )
+
     return JSONResponse(
         status_code=429,
         content={

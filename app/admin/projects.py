@@ -1,3 +1,4 @@
+import logging
 import uuid
 import os
 
@@ -17,6 +18,8 @@ from app.auth.dependencies import require_superuser
 from app.projects.service import ProjectService, CityService
 from app.projects.schemas import ProjectCreate, ProjectUpdate
 from app.projects.models import ProjectClass, ProjectStatus
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/projects", tags=["admin-projects"])
 
@@ -124,7 +127,14 @@ async def admin_project_add(
             images=image_data,
             is_published=is_published
         )
-        await ProjectService.create_project(session, project_data)
+        project = await ProjectService.create_project(session, project_data)
+
+        # Логируем создание проекта
+        logger.info(
+            f"Project created: id={project.id}, title='{title}', "
+            f"status={status.value}, published={is_published}, by_user={current_user.email}"
+        )
+
         return RedirectResponse(url="/admin/projects?success=created", status_code=303)
     except FileValidationError as e:
         return RedirectResponse(
@@ -238,6 +248,13 @@ async def admin_project_edit(
             is_published=is_published
         )
         await ProjectService.update_project(session, project_id, project_data)
+
+        # Логируем обновление проекта
+        logger.info(
+            f"Project updated: id={project_id}, title='{title}', "
+            f"status={status.value}, published={is_published}, by_user={current_user.email}"
+        )
+
         return RedirectResponse(url="/admin/projects?success=updated", status_code=303)
     except FileValidationError as e:
         return RedirectResponse(
@@ -258,9 +275,21 @@ async def admin_project_delete(
     session: AsyncSession = Depends(get_session)
 ):
     try:
+        # Получаем проект перед удалением для логирования
+        project = await ProjectService.get_project_by_id(session, project_id)
+        project_title = project.title if project else "unknown"
+
         await ProjectService.delete_project(session, project_id)
+
+        # Логируем удаление проекта
+        logger.info(
+            f"Project deleted: id={project_id}, title='{project_title}', "
+            f"by_user={current_user.email}"
+        )
+
         return RedirectResponse(url="/admin/projects?success=deleted", status_code=303)
     except Exception as e:
+        logger.error(f"Project deletion failed: {str(e)}")
         return RedirectResponse(
             url=f"/admin/projects?error={str(e)}",
             status_code=303

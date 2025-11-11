@@ -2,11 +2,14 @@
 File Upload Validation Utilities
 Provides secure file upload validation for images
 """
+import logging
 from fastapi import UploadFile, HTTPException
 from pathlib import Path
 from typing import List, Optional
 import imghdr
 import os
+
+logger = logging.getLogger(__name__)
 
 
 ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"}
@@ -58,12 +61,21 @@ async def validate_image_upload(
     file_extension = Path(file.filename).suffix.lower()
     if file_extension not in allowed_extensions:
         allowed_list = ", ".join(allowed_extensions)
+        logger.warning(
+            f"File upload rejected - invalid extension: "
+            f"filename={file.filename}, extension={file_extension}, "
+            f"content_type={file.content_type}"
+        )
         raise FileValidationError(
             f"Недопустимый формат файла. Разрешены: {allowed_list}"
         )
 
     # 3. Validate MIME type
     if file.content_type not in ALLOWED_IMAGE_MIMES:
+        logger.warning(
+            f"File upload rejected - invalid MIME type: "
+            f"filename={file.filename}, content_type={file.content_type}"
+        )
         raise FileValidationError(
             f"Недопустимый тип файла: {file.content_type}. "
             f"Ожидается изображение."
@@ -79,6 +91,11 @@ async def validate_image_upload(
 
     if file_size > max_size:
         max_size_mb = max_size / (1024 * 1024)
+        file_size_mb = file_size / (1024 * 1024)
+        logger.warning(
+            f"File upload rejected - size too large: "
+            f"filename={file.filename}, size={file_size_mb:.2f}MB, max={max_size_mb:.1f}MB"
+        )
         raise FileValidationError(
             f"Размер файла превышает {max_size_mb:.1f} МБ"
         )
@@ -96,12 +113,23 @@ async def validate_image_upload(
             if not (file_content.startswith(b'<?xml') or
                     file_content.startswith(b'<svg') or
                     b'<svg' in file_content[:200]):
+                logger.warning(
+                    f"File upload rejected - invalid SVG: filename={file.filename}"
+                )
                 raise FileValidationError("Недействительный SVG файл")
         elif image_type is None:
+            logger.warning(
+                f"File upload rejected - not an image or corrupted: "
+                f"filename={file.filename}, extension={file_extension}"
+            )
             raise FileValidationError(
                 "Файл не является изображением или поврежден"
             )
         elif image_type not in ['jpeg', 'png', 'gif', 'webp']:
+            logger.warning(
+                f"File upload rejected - unsupported format: "
+                f"filename={file.filename}, detected_type={image_type}"
+            )
             raise FileValidationError(
                 f"Неподдерживаемый формат изображения: {image_type}"
             )
@@ -112,6 +140,13 @@ async def validate_image_upload(
 
     # 6. Reset file pointer for subsequent use
     await file.seek(0)
+
+    # Log successful validation
+    file_size_mb = file_size / (1024 * 1024)
+    logger.info(
+        f"File upload validated successfully: "
+        f"filename={file.filename}, size={file_size_mb:.2f}MB, type={file_extension}"
+    )
 
 
 async def validate_multiple_images(
@@ -217,8 +252,19 @@ async def save_uploaded_file(
             content = await file.read()
             buffer.write(content)
 
+        file_size_mb = len(content) / (1024 * 1024)
+        logger.info(
+            f"File saved successfully: "
+            f"original={file.filename}, saved_as={unique_filename}, "
+            f"size={file_size_mb:.2f}MB, path={file_path}"
+        )
+
         return file_path
     except Exception as e:
+        logger.error(
+            f"Failed to save file: "
+            f"filename={file.filename}, path={file_path}, error={str(e)}"
+        )
         # Clean up partial file if exists
         if file_path.exists():
             os.remove(file_path)

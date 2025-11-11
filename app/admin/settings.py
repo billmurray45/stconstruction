@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Request, Depends, Form, File, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,6 +9,7 @@ import uuid
 import os
 
 from app.core.config.database import get_session
+from app.core.config.logging import log_security_event
 from app.core.web.templates import templates
 from app.core.security.file_validator import validate_image_upload, save_uploaded_file, FileValidationError, MAX_LOGO_SIZE
 
@@ -15,6 +17,8 @@ from app.users.models import User
 from app.auth.dependencies import require_superuser
 from app.landing.service import SiteSettingsService
 from app.landing.schemas import SiteSettingsUpdate
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/settings", tags=["admin-settings"])
 
@@ -127,14 +131,39 @@ async def admin_settings_update(
         )
 
         await SiteSettingsService.update_settings(session, settings_data)
+
+        # Логируем изменение настроек
+        changed_fields = []
+        if logo and logo.filename:
+            changed_fields.append(f"logo={logo.filename}")
+        if company_name != settings.company_name:
+            changed_fields.append(f"company_name")
+        if phone_primary != settings.phone_primary:
+            changed_fields.append(f"phone_primary")
+        if email_general != settings.email_general:
+            changed_fields.append(f"email_general")
+
+        log_security_event(
+            event_type="admin_settings_updated",
+            details={
+                "user_id": current_user.id,
+                "email": current_user.email,
+                "ip": request.client.host if request.client else "unknown",
+                "changed_fields": ", ".join(changed_fields) if changed_fields else "unknown"
+            },
+            level="INFO"
+        )
+
         return RedirectResponse(url="/admin/settings?success=updated", status_code=303)
 
     except FileValidationError as e:
+        logger.warning(f"Settings update failed - file validation: {e.detail}")
         return RedirectResponse(
             url=f"/admin/settings?error={e.detail}",
             status_code=303
         )
     except Exception as e:
+        logger.error(f"Settings update failed: {str(e)}", exc_info=True)
         return RedirectResponse(
             url=f"/admin/settings?error={str(e)}",
             status_code=303

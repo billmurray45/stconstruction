@@ -1,9 +1,10 @@
+import logging
+import uuid
+
 from fastapi import APIRouter, Request, Form, Depends, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path
-
-import uuid
 
 from app.core.config.database import get_session
 from app.core.web.templates import templates
@@ -21,6 +22,7 @@ from app.news.service import (
 )
 from app.news.schemas import NewsCreate, NewsUpdate
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/news", tags=["Admin News"])
 
@@ -100,7 +102,13 @@ async def admin_news_add(
             is_published=is_published
         )
 
-        await create_news(session, news_data)
+        news = await create_news(session, news_data)
+
+        # Логируем создание новости
+        logger.info(
+            f"News created: id={news.id}, title='{title}', "
+            f"published={is_published}, by_user={current_user.email}"
+        )
 
         return RedirectResponse(url="/admin/news?success=created", status_code=302)
 
@@ -232,6 +240,12 @@ async def admin_news_edit(
 
         await update_news_service(session, news_id, news_data)
 
+        # Логируем обновление новости
+        logger.info(
+            f"News updated: id={news_id}, title='{title}', "
+            f"published={is_published}, by_user={current_user.email}"
+        )
+
         return RedirectResponse(url="/admin/news?success=updated", status_code=302)
 
     except FileValidationError as e:
@@ -268,6 +282,7 @@ async def admin_news_delete(
 ):
     try:
         news = await get_news_by_id(session, news_id)
+        news_title = news.title
 
         await delete_news_service(session, news_id)
 
@@ -276,6 +291,12 @@ async def admin_news_delete(
             image_path = Path("app/static") / news.image_path
             if image_path.exists():
                 image_path.unlink()
+
+        # Логируем удаление новости
+        logger.info(
+            f"News deleted: id={news_id}, title='{news_title}', "
+            f"by_user={current_user.email}"
+        )
 
         return RedirectResponse(url="/admin/news?success=deleted", status_code=302)
 

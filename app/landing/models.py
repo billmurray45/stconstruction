@@ -2,7 +2,7 @@ import enum
 
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import String, Text, JSON
+from sqlalchemy import String, Text, JSON, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Enum, func
 
@@ -50,8 +50,12 @@ class SiteSettings(Base):
     stats_years_experience: Mapped[Optional[int]] = mapped_column(default=0, nullable=True)
 
     # Технические поля
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now()
+    )
 
     def __repr__(self):
         return f"<SiteSettings(company={self.company_name})>"
