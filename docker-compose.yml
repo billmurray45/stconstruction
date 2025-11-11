@@ -4,21 +4,27 @@ services:
     container_name: standart_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
-      - "5434:5432"
+      - "5432:5432"  # Стандартный порт
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./etc/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql  # Auto-create DBs
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cea_admin -d cea_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-standart_admin}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - construction_network
 
 volumes:
   postgres_data:
     driver: local
+
+networks:
+  construction_network:
+    driver: bridge
