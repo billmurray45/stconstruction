@@ -13,6 +13,7 @@ from app.core.security.csrf import SimpleCSRFMiddleware
 from app.core.config.database import get_session
 from app.core.security.rate_limit import limiter, rate_limit_exceeded_handler
 from app.landing.service import SiteSettingsService
+from app.admin.init_admin import initialize_admin_user
 from slowapi.errors import RateLimitExceeded
 
 from app.admin import admin_router
@@ -28,13 +29,17 @@ async def lifespan(app: FastAPI):
     logger = logging.getLogger(__name__)
     logger.info("Starting Standart Construction application...")
 
-    # Инициализация настроек сайта
+    # Инициализация настроек сайта и админа
     async for session in get_session():
         try:
             await SiteSettingsService.initialize_settings(session)
             logger.info("Site settings initialized successfully")
+
+            # Создание админа при первом запуске
+            await initialize_admin_user(session)
+            logger.info("Admin user initialization completed")
         except Exception as e:
-            logger.error(f"Failed to initialize site settings: {e}")
+            logger.error(f"Failed to initialize application: {e}")
         finally:
             break
 

@@ -14,6 +14,11 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: str = "development"
 
+    # Admin user settings (for initial setup)
+    ADMIN_EMAIL: str = "admin@example.com"
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = "admin"
+
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT == "production"
