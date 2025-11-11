@@ -1,0 +1,39 @@
+[Unit]
+Description=Construction Website - Development/Staging Environment
+Documentation=https://github.com/yourusername/construction
+After=network.target postgresql.service redis.service
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/construction-dev
+
+# Environment
+Environment="PATH=/var/www/construction-dev/venv/bin"
+EnvironmentFile=/var/www/construction-dev/.env
+
+# Main process
+ExecStart=/var/www/construction-dev/venv/bin/gunicorn \
+    --config /var/www/construction-dev/etc/gunicorn/gunicorn-dev.conf.py \
+    main:app
+
+# Restart policy
+Restart=always
+RestartSec=5s
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Logging
+StandardOutput=append:/var/www/construction-dev/logs/gunicorn-access.log
+StandardError=append:/var/www/construction-dev/logs/gunicorn-error.log
+
+# Resource limits
+LimitNOFILE=65536
+TimeoutStartSec=120
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
