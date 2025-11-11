@@ -22,12 +22,16 @@ class SiteSettingsRepository:
 
     @staticmethod
     async def get_or_create_settings(session: AsyncSession) -> SiteSettings:
+        from datetime import datetime, timezone
+
         settings = await SiteSettingsRepository.get_settings(session)
 
         if not settings:
             settings = SiteSettings(
                 id=SiteSettingsRepository.SETTINGS_ID,
-                company_name="Standart Construction"
+                company_name="Standart Construction",
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc)
             )
             session.add(settings)
             await session.commit()
@@ -43,6 +47,7 @@ class SiteSettingsRepository:
 
     @staticmethod
     async def create_default_settings(session: AsyncSession) -> SiteSettings:
+        from datetime import datetime, timezone
 
         settings = SiteSettings(
             id=SiteSettingsRepository.SETTINGS_ID,
@@ -54,7 +59,9 @@ class SiteSettingsRepository:
             meta_description="Строительство жилых комплексов комфорт, премиум и бизнес класса",
             stats_years_experience=10,
             stats_projects_completed=50,
-            stats_clients=1000
+            stats_clients=1000,
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc)
         )
         session.add(settings)
         await session.commit()
