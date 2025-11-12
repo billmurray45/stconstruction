@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.config.settings import settings
@@ -53,6 +54,12 @@ app = FastAPI(
 # Rate Limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
+# Trusted Host Middleware (for HTTPS)
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["stconstruction.kz", "www.stconstruction.kz", "localhost", "127.0.0.1"]
+)
 
 # CSRF Protection
 app.add_middleware(
