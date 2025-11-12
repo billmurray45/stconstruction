@@ -1,28 +1,77 @@
 services:
+  # PostgreSQL Database (only dev database)
   postgres:
     image: postgres:16
-    container_name: standart_db
+    container_name: construction_postgres_dev
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: standart_dev_db
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
-      - "5432:5432"  # Стандартный порт
+      - "5434:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./etc/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql  # Auto-create DBs
+      - postgres_dev_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-standart_admin}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-standart_admin} -d standart_dev_db"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
     networks:
       - construction_network
+    # Resource limits for 1GB RAM server
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+          cpus: '0.5'
+
+  # FastAPI Development Application
+  fastapi-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: construction_fastapi_dev
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - ENVIRONMENT=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=standart_dev_db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
+    volumes:
+      # Mount code for hot-reload
+      - .:/app
+      # But exclude these for performance
+      - /app/__pycache__
+      - /app/.git
+      - /app/venv
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - construction_network
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '1.0'
 
 volumes:
-  postgres_data:
+  postgres_dev_data:
     driver: local
 
 networks:
