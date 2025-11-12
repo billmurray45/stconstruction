@@ -15,11 +15,11 @@
     <meta name="twitter:title" content="{% block twitter_title %}{{ site.meta_title if site and site.meta_title else 'Standart Construction' }}{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}{{ site.meta_description if site and site.meta_description else 'Строительство жилых комплексов' }}{% endblock %}">
 
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='images/favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
     <link rel="preconnect" href="https://fonts.cdnfonts.com">
     <link href="https://fonts.cdnfonts.com/css/gilroy-bold" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-	<link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}?v=4" />
+	<link rel="stylesheet" href="/static/css/styles.css?v=4" />
 </head>
 <body>
     <!-- Header -->
@@ -421,7 +421,7 @@
     </script>
 
     <!-- CSRF Protection -->
-    <script src="{{ url_for('static', path='js/csrf.js') }}"></script>
-    <script src="{{ url_for('static', path='js/auth.js') }}"></script>
+    <script src="/static/js/csrf.js"></script>
+    <script src="/static/js/auth.js"></script>
 </body>
 </html>
