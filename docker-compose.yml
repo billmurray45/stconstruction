@@ -28,6 +28,26 @@ services:
           memory: 256M
           cpus: '0.5'
 
+  # Redis for Rate Limiting
+  redis:
+    image: redis:7-alpine
+    container_name: construction_redis_prod
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - construction_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
   # FastAPI Production Application
   fastapi-prod:
     build:
@@ -45,8 +65,11 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - SECRET_KEY=${SECRET_KEY}
+      - REDIS_URL=redis://redis:6379
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
