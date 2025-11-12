@@ -1,20 +1,20 @@
 services:
-  # PostgreSQL Database (only dev database)
+  # PostgreSQL Database (Production)
   postgres:
     image: postgres:16
-    container_name: construction_postgres_dev
+    container_name: construction_postgres_prod
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: standart_dev_db
+      POSTGRES_DB: standart_prod_db
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
-      - "5434:5432"
+      - "5432:5432"
     volumes:
-      - postgres_dev_data:/var/lib/postgresql/data
+      - postgres_prod_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-standart_admin} -d standart_dev_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-standart_admin} -d standart_prod_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,38 +25,31 @@ services:
     deploy:
       resources:
         limits:
-          memory: 192M
+          memory: 256M
           cpus: '0.5'
 
-  # FastAPI Development Application
-  fastapi-dev:
+  # FastAPI Production Application
+  fastapi-prod:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    container_name: construction_fastapi_dev
+      dockerfile: Dockerfile.prod
+    container_name: construction_fastapi_prod
     restart: unless-stopped
     ports:
-      - "8001:8001"
+      - "8000:8000"
     environment:
-      - ENVIRONMENT=development
+      - ENVIRONMENT=production
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_NAME=standart_dev_db
+      - DB_NAME=standart_prod_db
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - SECRET_KEY=${SECRET_KEY}
-    volumes:
-      # Mount code for hot-reload
-      - .:/app
-      # But exclude these for performance
-      - /app/__pycache__
-      - /app/.git
-      - /app/venv
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -67,11 +60,11 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
           cpus: '1.0'
 
 volumes:
-  postgres_dev_data:
+  postgres_prod_data:
     driver: local
 
 networks:
