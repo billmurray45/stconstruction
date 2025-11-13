@@ -105,8 +105,12 @@ function initMultipartFormHandling() {
 
         const method = form.method.toUpperCase() || 'POST';
 
+        // Force absolute HTTPS URL
+        const absoluteUrl = new URL(action, window.location.href);
+        console.log('[CSRF] Absolute URL:', absoluteUrl.href);
+
         try {
-            const response = await fetch(action, {
+            const response = await fetch(absoluteUrl.href, {
                 method: method,
                 headers: {
                     'x-csrf-token': csrfToken,  // CSRF через header для multipart
