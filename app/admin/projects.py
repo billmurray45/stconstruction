@@ -279,6 +279,21 @@ async def admin_project_delete(
         project = await ProjectService.get_project_by_id(session, project_id)
         project_title = project.title if project else "unknown"
 
+        # Delete project images if not default
+        if project.preview_image and project.preview_image != "uploads/projects/default.jpg":
+            from pathlib import Path
+            image_path = Path("app/static") / project.preview_image
+            if image_path.exists():
+                image_path.unlink()
+
+        # Delete gallery images
+        if project.gallery_images:
+            from pathlib import Path
+            for gallery_img in project.gallery_images:
+                img_path = Path("app/static") / gallery_img
+                if img_path.exists():
+                    img_path.unlink()
+
         await ProjectService.delete_project(session, project_id)
 
         # Логируем удаление проекта
