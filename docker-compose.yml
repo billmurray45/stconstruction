@@ -66,6 +66,9 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - SECRET_KEY=${SECRET_KEY}
       - REDIS_URL=redis://redis:6379
+    volumes:
+      # Mount uploads directory for persistent storage
+      - ./app/static/uploads:/app/app/static/uploads
     depends_on:
       postgres:
         condition: service_healthy
