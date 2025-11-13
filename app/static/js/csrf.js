@@ -83,10 +83,16 @@ function initMultipartFormHandling() {
         }
 
         const formData = new FormData(form);
+
+        // Get action - convert to relative path if it's a full URL
         let action = form.action || window.location.href;
 
-        // Ensure HTTPS protocol if page is loaded over HTTPS
-        if (window.location.protocol === 'https:' && action.startsWith('http://')) {
+        // If action is a full URL from same origin, convert to relative path
+        if (action.startsWith(window.location.origin)) {
+            action = action.substring(window.location.origin.length);
+        }
+        // If action is still an absolute URL with http://, convert to https://
+        else if (window.location.protocol === 'https:' && action.startsWith('http://')) {
             action = action.replace('http://', 'https://');
         }
 
