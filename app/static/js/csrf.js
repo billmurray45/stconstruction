@@ -87,6 +87,11 @@ function initMultipartFormHandling() {
         // Get action - convert to relative path if it's a full URL
         let action = form.action || window.location.href;
 
+        // Debug logging
+        console.log('[CSRF] Original action:', action);
+        console.log('[CSRF] window.location.origin:', window.location.origin);
+        console.log('[CSRF] window.location.protocol:', window.location.protocol);
+
         // If action is a full URL from same origin, convert to relative path
         if (action.startsWith(window.location.origin)) {
             action = action.substring(window.location.origin.length);
@@ -95,6 +100,8 @@ function initMultipartFormHandling() {
         else if (window.location.protocol === 'https:' && action.startsWith('http://')) {
             action = action.replace('http://', 'https://');
         }
+
+        console.log('[CSRF] Final action:', action);
 
         const method = form.method.toUpperCase() || 'POST';
 
