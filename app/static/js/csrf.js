@@ -83,7 +83,13 @@ function initMultipartFormHandling() {
         }
 
         const formData = new FormData(form);
-        const action = form.action || window.location.href;
+        let action = form.action || window.location.href;
+
+        // Ensure HTTPS protocol if page is loaded over HTTPS
+        if (window.location.protocol === 'https:' && action.startsWith('http://')) {
+            action = action.replace('http://', 'https://');
+        }
+
         const method = form.method.toUpperCase() || 'POST';
 
         try {
