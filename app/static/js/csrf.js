@@ -109,29 +109,34 @@ function initMultipartFormHandling() {
         const absoluteUrl = new URL(action, window.location.href);
         console.log('[CSRF] Absolute URL:', absoluteUrl.href);
 
-        try {
-            const response = await fetch(absoluteUrl.href, {
-                method: method,
-                headers: {
-                    'x-csrf-token': csrfToken,  // CSRF через header для multipart
-                },
-                body: formData,
-                redirect: 'follow'
-            });
+        // Use XMLHttpRequest instead of fetch to avoid mixed content issues
+        const xhr = new XMLHttpRequest();
 
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else if (response.ok) {
-                window.location.reload();
+        xhr.open(method, absoluteUrl.href);
+        xhr.setRequestHeader('x-csrf-token', csrfToken);
+
+        xhr.onload = function() {
+            console.log('[CSRF] Response status:', xhr.status);
+            if (xhr.status >= 200 && xhr.status < 300) {
+                // Check if response is a redirect
+                const redirectUrl = xhr.getResponseHeader('Location');
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                } else {
+                    window.location.reload();
+                }
             } else {
-                const text = await response.text();
-                console.error('[CSRF] Form submission failed:', response.status, text.substring(0, 200));
-                alert('Ошибка при отправке формы. Проверьте консоль.');
+                console.error('[CSRF] Form submission failed:', xhr.status, xhr.responseText.substring(0, 200));
+                alert('Ошибка при отправке формы: ' + xhr.status);
             }
-        } catch (error) {
-            console.error('[CSRF] Form submission error:', error);
-            alert('Ошибка: ' + error.message);
-        }
+        };
+
+        xhr.onerror = function() {
+            console.error('[CSRF] Network error');
+            alert('Ошибка сети при отправке формы');
+        };
+
+        xhr.send(formData);
     });
 }
 
