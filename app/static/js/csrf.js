@@ -117,12 +117,15 @@ function initMultipartFormHandling() {
 
         xhr.onload = function() {
             console.log('[CSRF] Response status:', xhr.status);
+            console.log('[CSRF] Response URL:', xhr.responseURL);
             if (xhr.status >= 200 && xhr.status < 300) {
-                // Check if response is a redirect
-                const redirectUrl = xhr.getResponseHeader('Location');
-                if (redirectUrl) {
-                    window.location.href = redirectUrl;
+                // XMLHttpRequest auto-follows redirects, so check final URL
+                const finalUrl = xhr.responseURL;
+                if (finalUrl && finalUrl !== absoluteUrl.href) {
+                    console.log('[CSRF] Redirecting to:', finalUrl);
+                    window.location.href = finalUrl;
                 } else {
+                    console.log('[CSRF] Reloading page');
                     window.location.reload();
                 }
             } else {
