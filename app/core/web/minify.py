@@ -63,19 +63,27 @@ class HTMLMinifyMiddleware(BaseHTTPMiddleware):
             )
 
             # Create new response with minified content
+            # Remove Content-Length header to let Starlette recalculate it
+            headers = dict(response.headers)
+            headers.pop("content-length", None)
+
             return Response(
                 content=minified_html,
                 status_code=response.status_code,
-                headers=dict(response.headers),
+                headers=headers,
                 media_type=response.media_type
             )
 
         except Exception as e:
             logger.warning(f"Failed to minify HTML for {request.url.path}: {str(e)}")
             # Return original response if minification fails
+            # Remove Content-Length header to let Starlette recalculate it
+            headers = dict(response.headers)
+            headers.pop("content-length", None)
+
             return Response(
                 content=body,
                 status_code=response.status_code,
-                headers=dict(response.headers),
+                headers=headers,
                 media_type=response.media_type
             )
