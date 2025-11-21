@@ -9,7 +9,7 @@ from pathlib import Path
 from app.core.config.database import get_session
 from app.core.web.templates import templates
 from app.core.utils.helpers import generate_slug
-from app.core.security.file_validator import validate_image_upload, save_uploaded_file, FileValidationError
+from app.core.security.file_validator import validate_image_upload, compress_and_save_image, FileValidationError
 
 from app.auth.dependencies import require_superuser
 from app.users.models import User
@@ -87,7 +87,7 @@ async def admin_news_add(
 
             # Сохранение файла
             destination_dir = Path("app/static/uploads/news")
-            await save_uploaded_file(image, destination_dir, unique_filename)
+            await compress_and_save_image(image, destination_dir, unique_filename)
 
             image_path = f"uploads/news/{unique_filename}"
         else:
@@ -219,7 +219,7 @@ async def admin_news_edit(
 
             # Сохранение файла
             destination_dir = Path("app/static/uploads/news")
-            await save_uploaded_file(image, destination_dir, unique_filename)
+            await compress_and_save_image(image, destination_dir, unique_filename)
 
             image_path = f"uploads/news/{unique_filename}"
 

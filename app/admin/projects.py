@@ -11,7 +11,7 @@ from pathlib import Path
 from app.core.config.database import get_session
 from app.core.web.templates import templates
 from app.core.utils.helpers import generate_slug
-from app.core.security.file_validator import validate_multiple_images, save_uploaded_file, FileValidationError
+from app.core.security.file_validator import validate_multiple_images, compress_and_save_image, FileValidationError
 
 from app.users.models import User
 from app.auth.dependencies import require_superuser
@@ -104,7 +104,7 @@ async def admin_project_add(
                 unique_filename = f"{uuid.uuid4()}{file_extension}"
 
                 # Сохраняем файл
-                await save_uploaded_file(image, UPLOAD_DIR, unique_filename)
+                await compress_and_save_image(image, UPLOAD_DIR, unique_filename)
 
                 # Добавляем URL в список
                 image_urls.append(f"/static/uploads/projects/{unique_filename}")
@@ -226,7 +226,7 @@ async def admin_project_edit(
                 unique_filename = f"{uuid.uuid4()}{file_extension}"
 
                 # Сохраняем файл
-                await save_uploaded_file(image, UPLOAD_DIR, unique_filename)
+                await compress_and_save_image(image, UPLOAD_DIR, unique_filename)
 
                 kept_urls.append(f"/static/uploads/projects/{unique_filename}")
 

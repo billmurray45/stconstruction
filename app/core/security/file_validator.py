@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import List, Optional
 import imghdr
 import os
+from PIL import Image
+import io
 
 logger = logging.getLogger(__name__)
 
@@ -269,3 +271,130 @@ async def save_uploaded_file(
         if file_path.exists():
             os.remove(file_path)
         raise Exception(f"Ошибка при сохранении файла: {str(e)}")
+
+
+async def compress_and_save_image(
+    file: UploadFile,
+    destination_dir: Path,
+    unique_filename: str,
+    max_width: int = 1920,
+    max_height: int = 1080,
+    quality: int = 85
+) -> Path:
+    """
+    Compresses and saves uploaded image to disk
+
+    Args:
+        file: FastAPI UploadFile object (already validated)
+        destination_dir: Directory to save file
+        unique_filename: Unique filename to use
+        max_width: Maximum width in pixels (default: 1920)
+        max_height: Maximum height in pixels (default: 1080)
+        quality: JPEG quality 1-100 (default: 85)
+
+    Returns:
+        Path to saved file
+
+    Raises:
+        Exception: If save/compression fails
+    """
+    # Ensure directory exists
+    destination_dir.mkdir(parents=True, exist_ok=True)
+
+    file_path = destination_dir / unique_filename
+
+    try:
+        # Read file content
+        content = await file.read()
+        original_size_mb = len(content) / (1024 * 1024)
+
+        # Check file extension
+        file_extension = Path(unique_filename).suffix.lower()
+
+        # SVG files - save without compression
+        if file_extension == ".svg":
+            with open(file_path, "wb") as buffer:
+                buffer.write(content)
+            logger.info(f"SVG saved without compression: {unique_filename}")
+            return file_path
+
+        # Open image with Pillow
+        image = Image.open(io.BytesIO(content))
+
+        # Convert RGBA to RGB if saving as JPEG
+        if image.mode in ('RGBA', 'LA', 'P') and file_extension in ['.jpg', '.jpeg']:
+            # Create white background
+            background = Image.new('RGB', image.size, (255, 255, 255))
+            if image.mode == 'P':
+                image = image.convert('RGBA')
+            background.paste(image, mask=image.split()[-1] if image.mode == 'RGBA' else None)
+            image = background
+        elif image.mode != 'RGB' and file_extension in ['.jpg', '.jpeg']:
+            image = image.convert('RGB')
+
+        # Get original dimensions
+        original_width, original_height = image.size
+
+        # Calculate new dimensions maintaining aspect ratio
+        if original_width > max_width or original_height > max_height:
+            ratio = min(max_width / original_width, max_height / original_height)
+            new_width = int(original_width * ratio)
+            new_height = int(original_height * ratio)
+
+            # Resize with high-quality resampling
+            image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            logger.info(
+                f"Image resized: {original_width}x{original_height} -> {new_width}x{new_height}"
+            )
+
+        # Save with compression
+        save_kwargs = {}
+        if file_extension in ['.jpg', '.jpeg']:
+            save_kwargs = {
+                'format': 'JPEG',
+                'quality': quality,
+                'optimize': True,
+                'progressive': True
+            }
+        elif file_extension == '.png':
+            save_kwargs = {
+                'format': 'PNG',
+                'optimize': True,
+                'compress_level': 6
+            }
+        elif file_extension == '.webp':
+            save_kwargs = {
+                'format': 'WEBP',
+                'quality': quality,
+                'method': 6
+            }
+        else:
+            # For GIF and other formats
+            save_kwargs = {'format': image.format or 'PNG'}
+
+        # Save optimized image
+        image.save(file_path, **save_kwargs)
+
+        # Get compressed size
+        compressed_size_mb = file_path.stat().st_size / (1024 * 1024)
+        compression_ratio = (1 - compressed_size_mb / original_size_mb) * 100
+
+        logger.info(
+            f"Image compressed and saved: "
+            f"original={file.filename}, saved_as={unique_filename}, "
+            f"original_size={original_size_mb:.2f}MB, "
+            f"compressed_size={compressed_size_mb:.2f}MB, "
+            f"saved={compression_ratio:.1f}%, path={file_path}"
+        )
+
+        return file_path
+
+    except Exception as e:
+        logger.error(
+            f"Failed to compress/save image: "
+            f"filename={file.filename}, path={file_path}, error={str(e)}"
+        )
+        # Clean up partial file if exists
+        if file_path.exists():
+            os.remove(file_path)
+        raise Exception(f"Ошибка при сжатии и сохранении изображения: {str(e)}")

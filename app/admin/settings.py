@@ -11,7 +11,7 @@ import os
 from app.core.config.database import get_session
 from app.core.config.logging import log_security_event
 from app.core.web.templates import templates
-from app.core.security.file_validator import validate_image_upload, save_uploaded_file, FileValidationError, MAX_LOGO_SIZE
+from app.core.security.file_validator import validate_image_upload, compress_and_save_image, FileValidationError, MAX_LOGO_SIZE
 
 from app.users.models import User
 from app.auth.dependencies import require_superuser
@@ -90,7 +90,7 @@ async def admin_settings_update(
             unique_filename = f"logo_{uuid.uuid4()}{file_extension}"
 
             # Сохранение файла
-            await save_uploaded_file(logo, UPLOAD_DIR, unique_filename)
+            await compress_and_save_image(logo, UPLOAD_DIR, unique_filename, max_width=800, max_height=800)
 
             logo_path = f"/static/uploads/settings/{unique_filename}"
 
