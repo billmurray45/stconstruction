@@ -13,6 +13,7 @@ from app.core.config.logging import setup_logging
 from app.core.security.csrf import SimpleCSRFMiddleware
 from app.core.config.database import get_session
 from app.core.security.rate_limit import limiter, rate_limit_exceeded_handler
+from app.core.web.minify import HTMLMinifyMiddleware
 from app.landing.service import SiteSettingsService
 from slowapi.errors import RateLimitExceeded
 
@@ -54,6 +55,12 @@ app = FastAPI(
 # Rate Limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
+# HTML Minification (only in production)
+app.add_middleware(
+    HTMLMinifyMiddleware,
+    enabled=settings.is_production
+)
 
 # Trusted Host Middleware (for HTTPS)
 app.add_middleware(
