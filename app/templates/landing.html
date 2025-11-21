@@ -2,8 +2,9 @@
 
 {% block content %}
     <section id="home" class="hero">
-	    <div class="hero-video-bg">
-		</div>
+        <video autoplay muted loop playsinline class="hero-video-bg">
+            <source src="/static/images/hero.mp4" type="video/mp4">
+        </video>
         <div class="container">
             <div class="hero-content">
                 <div class="hero-text">
@@ -398,15 +399,6 @@
         const aboutSection = document.querySelector('#about');
         if (aboutSection) {
             observer.observe(aboutSection);
-        }
-
-        const videoContainer = document.querySelector('.hero-video-bg');
-        if (videoContainer) {
-            const iframe = document.createElement('iframe');
-            iframe.src = 'https://www.youtube.com/embed/oA3Ic9-Y-7U?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playlist=oA3Ic9-Y-7U';
-            iframe.frameBorder = '0';
-            iframe.allowFullscreen = true;
-            videoContainer.appendChild(iframe);
         }
     });
     </script>
