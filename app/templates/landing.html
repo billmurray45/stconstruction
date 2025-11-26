@@ -98,21 +98,18 @@
                 </div>
                 {% endfor %}
             </div>
+
+            <div class="news-load-more">
+                <a href="/projects" class="btn-load-more">Все проекты</a>
+            </div>
         </div>
     </section>
 
     <!-- Завершенные проекты -->
     <section class="projects">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;">
                 <h2>Завершенные проекты</h2>
-            </div>
-
-            <div class="project-tabs">
-                <button class="tab-btn active" data-city="all">Все города</button>
-                {% for city in cities %}
-                <button class="tab-btn" data-city="{{ city.slug }}">{{ city.name }}</button>
-                {% endfor %}
             </div>
 
             <div class="projects-list">

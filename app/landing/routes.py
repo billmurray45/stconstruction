@@ -25,17 +25,19 @@ async def index(request: Request, session: AsyncSession = Depends(get_session)):
     latest_news = await get_latest_news(session, limit=3)
     cities = await CityService.get_all_cities(session, active_only=True)
 
-    # Получаем текущие и завершенные проекты отдельно
-    current_projects = await ProjectService.get_all_projects(
+    all_current = await ProjectService.get_all_projects(
         session,
         published_only=True,
         status=ProjectStatus.CURRENT
     )
-    completed_projects = await ProjectService.get_all_projects(
+    all_completed = await ProjectService.get_all_projects(
         session,
         published_only=True,
         status=ProjectStatus.COMPLETED
     )
+
+    current_projects = all_current[:5]
+    completed_projects = all_completed[:3]
 
     # Получаем настройки сайта для глобального доступа
     site_context = await get_site_settings_context(session)
