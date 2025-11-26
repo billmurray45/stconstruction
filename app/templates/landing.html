@@ -32,7 +32,91 @@
             </div>
 
             <div class="projects-list">
-                {% for project in projects %}
+                {% for project in current_projects %}
+                <div class="modern-project-card" data-city="{{ project.city.slug if project.city else 'unknown' }}">
+                    <div class="project-left">
+                        <span class="project-class {% if project.project_class.value == 'economy' %}economy{% elif project.project_class.value == 'comfort' %}comfort{% elif project.project_class.value == 'business' %}business{% elif project.project_class.value == 'premium' %}premium{% elif project.project_class.value == 'elite' %}elite{% endif %}">
+                            {% if project.project_class.value == 'economy' %}Эконом-класс{% elif project.project_class.value == 'comfort' %}Комфорт-класс{% elif project.project_class.value == 'business' %}Бизнес-класс{% elif project.project_class.value == 'premium' %}Премиум-класс{% elif project.project_class.value == 'elite' %}Элитный-класс{% endif %}
+                        </span>
+                        <h3 class="project-title">{{ project.title }}</h3>
+                        {% if project.subtitle %}
+                        <p class="project-subtitle">{{ project.subtitle }}</p>
+                        {% endif %}
+
+                        <div class="project-meta">
+                            <div class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>{{ project.city.name if project.city else '' }}, {{ project.address }}</span>
+                            </div>
+                            {% if project.implementation_stage %}
+                            <div class="meta-item">
+                                <strong>Этап реализации:</strong>
+                                <span>{{ project.implementation_stage }}</span>
+                            </div>
+                            {% endif %}
+                            {% if project.completion_date %}
+                            <div class="meta-item">
+                                <strong>Срок сдачи:</strong>
+                                <span>{{ project.completion_date }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <a href="/projects/{{ project.slug }}" class="btn-details">Подробнее</a>
+                    </div>
+                    <div class="project-right">
+                        {% if project.sold_percent > 0 %}
+                        <div class="project-sold-badge">Продан<br>{{ project.sold_percent }}%</div>
+                        {% endif %}
+                        {% if project.images and project.images.urls and project.images.urls|length > 1 %}
+                        <div class="project-navigation">
+                            <button class="nav-arrow nav-prev" data-carousel="project-{{ project.id }}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <button class="nav-arrow nav-next" data-carousel="project-{{ project.id }}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                        {% endif %}
+                        <div class="project-carousel" id="project-{{ project.id }}">
+                            {% if project.images and project.images.urls and project.images.urls|length > 0 %}
+                                {% for image_url in project.images.urls %}
+                                <img src="{{ image_url }}" alt="{{ project.title }} {{ loop.index }}" class="project-image-main carousel-image {% if loop.first %}active{% endif %}">
+                                {% endfor %}
+                            {% else %}
+                            <div style="width:100%;height:100%;background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);display:flex;align-items:center;justify-content:center;font-size:4rem;color:rgba(255,255,255,0.3)">🏢</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Завершенные проекты -->
+    <section class="projects">
+        <div class="container">
+            <div class="section-header">
+                <h2>Завершенные проекты</h2>
+            </div>
+
+            <div class="project-tabs">
+                <button class="tab-btn active" data-city="all">Все города</button>
+                {% for city in cities %}
+                <button class="tab-btn" data-city="{{ city.slug }}">{{ city.name }}</button>
+                {% endfor %}
+            </div>
+
+            <div class="projects-list">
+                {% for project in completed_projects %}
                 <div class="modern-project-card" data-city="{{ project.city.slug if project.city else 'unknown' }}">
                     <div class="project-left">
                         <span class="project-class {% if project.project_class.value == 'economy' %}economy{% elif project.project_class.value == 'comfort' %}comfort{% elif project.project_class.value == 'business' %}business{% elif project.project_class.value == 'premium' %}premium{% elif project.project_class.value == 'elite' %}elite{% endif %}">
@@ -317,87 +401,5 @@
         </div>
     </section>
 
-    <script>
-    document.getElementById('callbackForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const form = e.target;
-        const name = form.querySelector('input[name="name"]').value;
-        const phone = form.querySelector('input[name="phone"]').value;
-        const messagesDiv = document.getElementById('form-messages');
-        const button = form.querySelector('button[type="submit"]');
-
-        button.disabled = true;
-        button.textContent = 'Отправка...';
-        messagesDiv.style.display = 'none';
-        messagesDiv.className = 'form-message';
-
-        try {
-            const response = await fetchWithCsrf('/request-callback', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, phone }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                messagesDiv.textContent = result.message;
-                messagesDiv.classList.add('success');
-                form.reset();
-            } else {
-                messagesDiv.textContent = result.message || 'Произошла ошибка.';
-                messagesDiv.classList.add('error');
-            }
-        } catch (error) {
-            messagesDiv.textContent = 'Сетевая ошибка. Попробуйте позже.';
-            messagesDiv.classList.add('error');
-        } finally {
-            messagesDiv.style.display = 'block';
-            button.disabled = false;
-            button.textContent = 'Перезвоните мне';
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const stats = document.querySelectorAll('.stat-number');
-        let animated = false;
-
-        const animateCounter = (element) => {
-            const target = parseInt(element.getAttribute('data-target'));
-            const duration = 2000; // 2 seconds
-            const increment = target / (duration / 16); // 60 FPS
-            let current = 0;
-
-            const updateCounter = () => {
-                current += increment;
-                if (current < target) {
-                    element.textContent = Math.floor(current);
-                    requestAnimationFrame(updateCounter);
-                } else {
-                    element.textContent = target;
-                }
-            };
-
-            updateCounter();
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !animated) {
-                    animated = true;
-                    stats.forEach(stat => animateCounter(stat));
-                    observer.disconnect();
-                }
-            });
-        }, { threshold: 0.5 });
-
-        const aboutSection = document.querySelector('#about');
-        if (aboutSection) {
-            observer.observe(aboutSection);
-        }
-    });
-    </script>
+    <script>document.getElementById('callbackForm').addEventListener('submit',async function(e){e.preventDefault();const form=e.target;const name=form.querySelector('input[name="name"]').value;const phone=form.querySelector('input[name="phone"]').value;const messagesDiv=document.getElementById('form-messages');const button=form.querySelector('button[type="submit"]');button.disabled=!0;button.textContent='Отправка...';messagesDiv.style.display='none';messagesDiv.className='form-message';try{const response=await fetchWithCsrf('/request-callback',{method:'POST',headers:{'Content-Type':'application/json',},body:JSON.stringify({name,phone}),});const result=await response.json();if(response.ok){messagesDiv.textContent=result.message;messagesDiv.classList.add('success');form.reset()}else{messagesDiv.textContent=result.message||'Произошла ошибка.';messagesDiv.classList.add('error')}}catch(error){messagesDiv.textContent='Сетевая ошибка. Попробуйте позже.';messagesDiv.classList.add('error')}finally{messagesDiv.style.display='block';button.disabled=!1;button.textContent='Перезвоните мне'}});document.addEventListener('DOMContentLoaded',function(){const stats=document.querySelectorAll('.stat-number');let animated=!1;const animateCounter=(element)=>{const target=parseInt(element.getAttribute('data-target'));const duration=2000;const increment=target/(duration/16);let current=0;const updateCounter=()=>{current+=increment;if(current<target){element.textContent=Math.floor(current);requestAnimationFrame(updateCounter)}else{element.textContent=target}};updateCounter()};const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting&&!animated){animated=!0;stats.forEach(stat=>animateCounter(stat));observer.disconnect()}})},{threshold:0.5});const aboutSection=document.querySelector('#about');if(aboutSection){observer.observe(aboutSection)}});</script>
 {% endblock %}

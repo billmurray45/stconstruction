@@ -9,6 +9,7 @@ from app.core.web.context_processors import get_site_settings_context
 from app.core.security.rate_limit import limiter
 from app.news.service import get_latest_news
 from app.projects.service import ProjectService, CityService
+from app.projects.models import ProjectStatus
 from app.auth.dependencies import set_current_user_optional
 from .schemas import CallbackRequestCreate
 from .service import LandingService
@@ -23,7 +24,18 @@ async def index(request: Request, session: AsyncSession = Depends(get_session)):
     """Главная страница"""
     latest_news = await get_latest_news(session, limit=3)
     cities = await CityService.get_all_cities(session, active_only=True)
-    projects = await ProjectService.get_all_projects(session, published_only=True)
+
+    # Получаем текущие и завершенные проекты отдельно
+    current_projects = await ProjectService.get_all_projects(
+        session,
+        published_only=True,
+        status=ProjectStatus.CURRENT
+    )
+    completed_projects = await ProjectService.get_all_projects(
+        session,
+        published_only=True,
+        status=ProjectStatus.COMPLETED
+    )
 
     # Получаем настройки сайта для глобального доступа
     site_context = await get_site_settings_context(session)
@@ -34,8 +46,30 @@ async def index(request: Request, session: AsyncSession = Depends(get_session)):
             "request": request,
             "latest_news": latest_news,
             "cities": cities,
-            "projects": projects,
+            "current_projects": current_projects,
+            "completed_projects": completed_projects,
             **site_context  # Добавляем настройки сайта в контекст
+        }
+    )
+
+
+@router.get("/projects", response_class=HTMLResponse)
+async def projects(request: Request, session: AsyncSession = Depends(get_session)):
+    """Страница всех проектов"""
+    cities = await CityService.get_all_cities(session, active_only=True)
+
+    # Получаем все опубликованные проекты
+    all_projects = await ProjectService.get_all_projects(session, published_only=True)
+
+    site_context = await get_site_settings_context(session)
+
+    return templates.TemplateResponse(
+        "projects.html",
+        {
+            "request": request,
+            "cities": cities,
+            "projects": all_projects,
+            **site_context
         }
     )
 
