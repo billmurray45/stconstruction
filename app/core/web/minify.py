@@ -44,7 +44,7 @@ class HTMLMinifyMiddleware(BaseHTTPMiddleware):
                 html_content,
                 remove_comments=True,
                 remove_empty_space=True,
-                remove_all_empty_space=False,  # Keep some spaces for readability
+                remove_all_empty_space=True,  # Keep some spaces for readability
                 reduce_boolean_attributes=False,  # Don't touch boolean attributes
                 remove_optional_attribute_quotes=False,  # Keep all quotes
                 convert_charrefs=False,  # Don't convert character references
