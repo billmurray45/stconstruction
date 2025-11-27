@@ -38,17 +38,19 @@ class HTMLMinifyMiddleware(BaseHTTPMiddleware):
             body += chunk
 
         try:
-            # Minify HTML
+            # Minify HTML with conservative settings
             html_content = body.decode("utf-8")
             minified_html = htmlmin.minify(
                 html_content,
                 remove_comments=True,
                 remove_empty_space=True,
                 remove_all_empty_space=False,  # Keep some spaces for readability
-                reduce_boolean_attributes=True,
-                remove_optional_attribute_quotes=False,  # Keep quotes for security
-                convert_charrefs=True,
-                keep_pre=True  # Preserve <pre> tags
+                reduce_boolean_attributes=False,  # Don't touch boolean attributes
+                remove_optional_attribute_quotes=False,  # Keep all quotes
+                convert_charrefs=False,  # Don't convert character references
+                keep_pre=True,  # Preserve <pre> tags
+                keep_link=True,  # Preserve <link> tags exactly as is
+                keep_script=True  # Preserve <script> tags exactly as is
             )
 
             # Calculate compression ratio
